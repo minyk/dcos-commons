@@ -6,7 +6,7 @@ import dcos.http
 import pytest
 import sdk_cmd
 import sdk_hosts
-import sdk_install as install
+import sdk_install
 import sdk_marathon
 import sdk_metrics
 import sdk_plan
@@ -24,11 +24,11 @@ ZK_SERVICE_PATH = sdk_utils.get_zk_path(FOLDERED_SERVICE_NAME)
 @pytest.fixture(scope='module', autouse=True)
 def configure_package(configure_security):
     try:
-        install.uninstall(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME)
+        sdk_install.uninstall(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME)
 
         if shakedown.dcos_version_less_than("1.9"):
             # Last beta-kafka release (1.1.25-0.10.1.0-beta) excludes 1.8. Skip upgrade tests with 1.8 and just install
-            install.install(
+            sdk_install.install(
                 config.PACKAGE_NAME,
                 FOLDERED_SERVICE_NAME,
                 config.DEFAULT_BROKER_COUNT,
@@ -41,11 +41,12 @@ def configure_package(configure_security):
                 additional_options={"service": {"name": FOLDERED_SERVICE_NAME}})
 
         # wait for brokers to finish registering before starting tests
-        test_utils.broker_count_check(config.DEFAULT_BROKER_COUNT, service_name=FOLDERED_SERVICE_NAME)
+        test_utils.broker_count_check(
+            config.DEFAULT_BROKER_COUNT, service_name=FOLDERED_SERVICE_NAME)
 
         yield  # let the test session execute
     finally:
-        install.uninstall(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME)
+        sdk_install.uninstall(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME)
 
 
 # --------- Endpoints -------------
@@ -78,7 +79,8 @@ def test_endpoints_zookeeper_default():
     zookeeper = sdk_cmd.svc_cli(
         config.PACKAGE_NAME, FOLDERED_SERVICE_NAME,
         'endpoints zookeeper')
-    assert zookeeper.rstrip('\n') == 'master.mesos:2181/{}'.format(ZK_SERVICE_PATH)
+    assert zookeeper.rstrip(
+        '\n') == 'master.mesos:2181/{}'.format(ZK_SERVICE_PATH)
 
 
 @pytest.mark.smoke
@@ -109,7 +111,8 @@ def test_custom_zookeeper():
     sdk_plan.wait_for_completed_deployment(FOLDERED_SERVICE_NAME)
 
     # wait for brokers to finish registering
-    test_utils.broker_count_check(config.DEFAULT_BROKER_COUNT, service_name=FOLDERED_SERVICE_NAME)
+    test_utils.broker_count_check(
+        config.DEFAULT_BROKER_COUNT, service_name=FOLDERED_SERVICE_NAME)
 
     zookeeper = sdk_cmd.svc_cli(
         config.PACKAGE_NAME, FOLDERED_SERVICE_NAME,
@@ -117,7 +120,8 @@ def test_custom_zookeeper():
     assert zookeeper.rstrip('\n') == zk_path
 
     # topic created earlier against default zk should no longer be present:
-    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'topic list', json=True) == []
+    assert sdk_cmd.svc_cli(
+        config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'topic list', json=True) == []
 
     # tests from here continue with the custom ZK path...
 
@@ -128,8 +132,10 @@ def test_custom_zookeeper():
 @pytest.mark.smoke
 @pytest.mark.sanity
 def test_broker_list():
-    brokers = sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'broker list', json=True)
-    assert set(brokers) == set([str(i) for i in range(config.DEFAULT_BROKER_COUNT)])
+    brokers = sdk_cmd.svc_cli(
+        config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'broker list', json=True)
+    assert set(brokers) == set([str(i)
+                                for i in range(config.DEFAULT_BROKER_COUNT)])
 
 
 @pytest.mark.smoke
@@ -293,50 +299,69 @@ def test_help_cli():
 @pytest.mark.smoke
 @pytest.mark.sanity
 def test_config_cli():
-    configs = sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'config list', json=True)
-    assert len(configs) >= 1  # refrain from breaking this test if earlier tests did a config update
+    configs = sdk_cmd.svc_cli(
+        config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'config list', json=True)
+    # refrain from breaking this test if earlier tests did a config update
+    assert len(configs) >= 1
 
-    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'config show {}'.format(configs[0]), print_output=False) # noisy output
-    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'config target', json=True)
-    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'config target_id', json=True)
+    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'config show {}'.format(
+        configs[0]), print_output=False)  # noisy output
+    assert sdk_cmd.svc_cli(config.PACKAGE_NAME,
+                           FOLDERED_SERVICE_NAME, 'config target', json=True)
+    assert sdk_cmd.svc_cli(
+        config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'config target_id', json=True)
 
 
 @pytest.mark.smoke
 @pytest.mark.sanity
 def test_plan_cli():
-    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'plan list', json=True)
-    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'plan show {}'.format(config.DEFAULT_PLAN_NAME))
-    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'plan show --json {}'.format(config.DEFAULT_PLAN_NAME), json=True)
-    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'plan show {} --json'.format(config.DEFAULT_PLAN_NAME), json=True)
-    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'plan force-restart {}'.format(config.DEFAULT_PLAN_NAME))
-    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'plan interrupt {} {}'.format(config.DEFAULT_PLAN_NAME, config.DEFAULT_PHASE_NAME))
-    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'plan continue {} {}'.format(config.DEFAULT_PLAN_NAME, config.DEFAULT_PHASE_NAME))
+    assert sdk_cmd.svc_cli(config.PACKAGE_NAME,
+                           FOLDERED_SERVICE_NAME, 'plan list', json=True)
+    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME,
+                           'plan show {}'.format(config.DEFAULT_PLAN_NAME))
+    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME,
+                           'plan show --json {}'.format(config.DEFAULT_PLAN_NAME), json=True)
+    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME,
+                           'plan show {} --json'.format(config.DEFAULT_PLAN_NAME), json=True)
+    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME,
+                           'plan force-restart {}'.format(config.DEFAULT_PLAN_NAME))
+    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'plan interrupt {} {}'.format(
+        config.DEFAULT_PLAN_NAME, config.DEFAULT_PHASE_NAME))
+    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'plan continue {} {}'.format(
+        config.DEFAULT_PLAN_NAME, config.DEFAULT_PHASE_NAME))
 
 
 @pytest.mark.smoke
 @pytest.mark.sanity
 def test_state_cli():
-    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'state framework_id', json=True)
-    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'state properties', json=True)
+    assert sdk_cmd.svc_cli(
+        config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'state framework_id', json=True)
+    assert sdk_cmd.svc_cli(
+        config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'state properties', json=True)
 
 
 @pytest.mark.smoke
 @pytest.mark.sanity
 def test_pod_cli():
-    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'pod list', json=True)
-    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'pod status {}-0'.format(config.DEFAULT_POD_TYPE), json=True)
-    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'pod info {}-0'.format(config.DEFAULT_POD_TYPE), print_output=False)  # noisy output
+    assert sdk_cmd.svc_cli(config.PACKAGE_NAME,
+                           FOLDERED_SERVICE_NAME, 'pod list', json=True)
+    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME,
+                           'pod status {}-0'.format(config.DEFAULT_POD_TYPE), json=True)
+    assert sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME,
+                           'pod info {}-0'.format(config.DEFAULT_POD_TYPE), print_output=False)  # noisy output
 
 
 @pytest.mark.sanity
 @pytest.mark.metrics
 @sdk_utils.dcos_1_9_or_higher
 def test_metrics():
-    sdk_metrics.wait_for_any_metrics(
+    sdk_metrics.wait_for_service_metrics(
         config.PACKAGE_NAME,
         FOLDERED_SERVICE_NAME,
         "kafka-0-broker",
-        config.DEFAULT_KAFKA_TIMEOUT)
+        config.DEFAULT_KAFKA_TIMEOUT,
+        config.EXPECTED_METRICS
+    )
 
 
 # --------- Suppressed -------------

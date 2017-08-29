@@ -30,14 +30,16 @@ def configure_package(configure_security):
                 config.PACKAGE_NAME,
                 FOLDERED_SERVICE_NAME,
                 config.DEFAULT_TASK_COUNT,
-                additional_options={"service": {"name": FOLDERED_SERVICE_NAME}},
+                additional_options={"service": {
+                    "name": FOLDERED_SERVICE_NAME}},
                 timeout_seconds=30 * 60)
         else:
             sdk_upgrade.test_upgrade(
                 config.PACKAGE_NAME,
                 FOLDERED_SERVICE_NAME,
                 config.DEFAULT_TASK_COUNT,
-                additional_options={"service": {"name": FOLDERED_SERVICE_NAME}},
+                additional_options={"service": {
+                    "name": FOLDERED_SERVICE_NAME}},
                 timeout_seconds=30 * 60)
 
         yield  # let the test session execute
@@ -93,9 +95,11 @@ def test_kill_journal_node():
     name_ids = sdk_tasks.get_task_ids(FOLDERED_SERVICE_NAME, 'name')
     data_ids = sdk_tasks.get_task_ids(FOLDERED_SERVICE_NAME, 'data')
 
-    sdk_tasks.kill_task_with_pattern('journalnode', sdk_hosts.system_host(FOLDERED_SERVICE_NAME, 'journal-0-node'))
+    sdk_tasks.kill_task_with_pattern('journalnode', sdk_hosts.system_host(
+        FOLDERED_SERVICE_NAME, 'journal-0-node'))
     config.expect_recovery(service_name=FOLDERED_SERVICE_NAME)
-    sdk_tasks.check_tasks_updated(FOLDERED_SERVICE_NAME, 'journal', journal_ids)
+    sdk_tasks.check_tasks_updated(
+        FOLDERED_SERVICE_NAME, 'journal', journal_ids)
     sdk_tasks.check_tasks_not_updated(FOLDERED_SERVICE_NAME, 'name', name_ids)
     sdk_tasks.check_tasks_not_updated(FOLDERED_SERVICE_NAME, 'data', data_ids)
 
@@ -107,10 +111,12 @@ def test_kill_name_node():
     journal_ids = sdk_tasks.get_task_ids(FOLDERED_SERVICE_NAME, 'journal')
     data_ids = sdk_tasks.get_task_ids(FOLDERED_SERVICE_NAME, 'data')
 
-    sdk_tasks.kill_task_with_pattern('namenode', sdk_hosts.system_host(FOLDERED_SERVICE_NAME, 'name-0-node'))
+    sdk_tasks.kill_task_with_pattern(
+        'namenode', sdk_hosts.system_host(FOLDERED_SERVICE_NAME, 'name-0-node'))
     config.expect_recovery(service_name=FOLDERED_SERVICE_NAME)
     sdk_tasks.check_tasks_updated(FOLDERED_SERVICE_NAME, 'name', name_ids)
-    sdk_tasks.check_tasks_not_updated(FOLDERED_SERVICE_NAME, 'journal', journal_ids)
+    sdk_tasks.check_tasks_not_updated(
+        FOLDERED_SERVICE_NAME, 'journal', journal_ids)
     sdk_tasks.check_tasks_not_updated(FOLDERED_SERVICE_NAME, 'data', data_ids)
 
 
@@ -121,17 +127,20 @@ def test_kill_data_node():
     journal_ids = sdk_tasks.get_task_ids(FOLDERED_SERVICE_NAME, 'journal')
     name_ids = sdk_tasks.get_task_ids(FOLDERED_SERVICE_NAME, 'name')
 
-    sdk_tasks.kill_task_with_pattern('datanode', sdk_hosts.system_host(FOLDERED_SERVICE_NAME, 'data-0-node'))
+    sdk_tasks.kill_task_with_pattern(
+        'datanode', sdk_hosts.system_host(FOLDERED_SERVICE_NAME, 'data-0-node'))
     config.expect_recovery(service_name=FOLDERED_SERVICE_NAME)
     sdk_tasks.check_tasks_updated(FOLDERED_SERVICE_NAME, 'data', data_ids)
-    sdk_tasks.check_tasks_not_updated(FOLDERED_SERVICE_NAME, 'journal', journal_ids)
+    sdk_tasks.check_tasks_not_updated(
+        FOLDERED_SERVICE_NAME, 'journal', journal_ids)
     sdk_tasks.check_tasks_not_updated(FOLDERED_SERVICE_NAME, 'name', name_ids)
 
 
 @pytest.mark.sanity
 @pytest.mark.recovery
 def test_kill_scheduler():
-    sdk_tasks.kill_task_with_pattern('hdfs.scheduler.Main', shakedown.get_service_ips('marathon').pop())
+    sdk_tasks.kill_task_with_pattern(
+        'hdfs.scheduler.Main', shakedown.get_service_ips('marathon').pop())
     config.check_healthy(service_name=FOLDERED_SERVICE_NAME)
 
 
@@ -149,7 +158,8 @@ def test_kill_all_journalnodes():
     config.expect_recovery(service_name=FOLDERED_SERVICE_NAME)
 
     # name nodes fail and restart, so don't check those
-    sdk_tasks.check_tasks_updated(FOLDERED_SERVICE_NAME, 'journal', journal_ids)
+    sdk_tasks.check_tasks_updated(
+        FOLDERED_SERVICE_NAME, 'journal', journal_ids)
     sdk_tasks.check_tasks_not_updated(FOLDERED_SERVICE_NAME, 'data', data_ids)
 
 
@@ -168,7 +178,8 @@ def test_kill_all_namenodes():
     config.expect_recovery(service_name=FOLDERED_SERVICE_NAME)
 
     sdk_tasks.check_tasks_updated(FOLDERED_SERVICE_NAME, 'name', name_ids)
-    sdk_tasks.check_tasks_not_updated(FOLDERED_SERVICE_NAME, 'journal', journal_ids)
+    sdk_tasks.check_tasks_not_updated(
+        FOLDERED_SERVICE_NAME, 'journal', journal_ids)
     sdk_tasks.check_tasks_not_updated(FOLDERED_SERVICE_NAME, 'data', data_ids)
 
 
@@ -187,7 +198,8 @@ def test_kill_all_datanodes():
     config.expect_recovery(service_name=FOLDERED_SERVICE_NAME)
 
     sdk_tasks.check_tasks_updated(FOLDERED_SERVICE_NAME, 'data', data_ids)
-    sdk_tasks.check_tasks_not_updated(FOLDERED_SERVICE_NAME, 'journal', journal_ids)
+    sdk_tasks.check_tasks_not_updated(
+        FOLDERED_SERVICE_NAME, 'journal', journal_ids)
     sdk_tasks.check_tasks_not_updated(FOLDERED_SERVICE_NAME, 'name', name_ids)
 
 
@@ -208,14 +220,17 @@ def test_permanent_and_transient_namenode_failures_0_1():
     journal_ids = sdk_tasks.get_task_ids(FOLDERED_SERVICE_NAME, 'journal')
     data_ids = sdk_tasks.get_task_ids(FOLDERED_SERVICE_NAME, 'data')
 
-    sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'pod replace name-0')
-    sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'pod restart name-1')
+    sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME,
+                    'pod replace name-0')
+    sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME,
+                    'pod restart name-1')
 
     config.expect_recovery(service_name=FOLDERED_SERVICE_NAME)
 
     sdk_tasks.check_tasks_updated(FOLDERED_SERVICE_NAME, 'name-0', name_0_ids)
     sdk_tasks.check_tasks_updated(FOLDERED_SERVICE_NAME, 'name-1', name_1_ids)
-    sdk_tasks.check_tasks_not_updated(FOLDERED_SERVICE_NAME, 'journal', journal_ids)
+    sdk_tasks.check_tasks_not_updated(
+        FOLDERED_SERVICE_NAME, 'journal', journal_ids)
     sdk_tasks.check_tasks_not_updated(FOLDERED_SERVICE_NAME, 'data', data_ids)
 
 
@@ -228,14 +243,17 @@ def test_permanent_and_transient_namenode_failures_1_0():
     journal_ids = sdk_tasks.get_task_ids(FOLDERED_SERVICE_NAME, 'journal')
     data_ids = sdk_tasks.get_task_ids(FOLDERED_SERVICE_NAME, 'data')
 
-    sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'pod replace name-1')
-    sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'pod restart name-0')
+    sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME,
+                    'pod replace name-1')
+    sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME,
+                    'pod restart name-0')
 
     config.expect_recovery(service_name=FOLDERED_SERVICE_NAME)
 
     sdk_tasks.check_tasks_updated(FOLDERED_SERVICE_NAME, 'name-0', name_0_ids)
     sdk_tasks.check_tasks_updated(FOLDERED_SERVICE_NAME, 'name-1', name_1_ids)
-    sdk_tasks.check_tasks_not_updated(FOLDERED_SERVICE_NAME, 'journal', journal_ids)
+    sdk_tasks.check_tasks_not_updated(
+        FOLDERED_SERVICE_NAME, 'journal', journal_ids)
     sdk_tasks.check_tasks_not_updated(FOLDERED_SERVICE_NAME, 'data', data_ids)
 
 
@@ -252,7 +270,8 @@ def test_bump_journal_cpus():
 
     sdk_marathon.bump_cpu_count_config(FOLDERED_SERVICE_NAME, 'JOURNAL_CPUS')
 
-    sdk_tasks.check_tasks_updated(FOLDERED_SERVICE_NAME, 'journal', journal_ids)
+    sdk_tasks.check_tasks_updated(
+        FOLDERED_SERVICE_NAME, 'journal', journal_ids)
     # journal node update should not cause any of the name nodes to crash
     sdk_tasks.check_tasks_not_updated(FOLDERED_SERVICE_NAME, 'name', name_ids)
     config.check_healthy(service_name=FOLDERED_SERVICE_NAME)
@@ -288,11 +307,13 @@ def test_modify_app_config():
     log.info(marathon_config)
     expiry_ms = int(marathon_config['env'][app_config_field])
     marathon_config['env'][app_config_field] = str(expiry_ms + 1)
-    sdk_marathon.update_app(FOLDERED_SERVICE_NAME, marathon_config, timeout=15 * 60)
+    sdk_marathon.update_app(FOLDERED_SERVICE_NAME,
+                            marathon_config, timeout=15 * 60)
 
     # All tasks should be updated because hdfs-site.xml has changed
     config.check_healthy(service_name=FOLDERED_SERVICE_NAME)
-    sdk_tasks.check_tasks_updated(FOLDERED_SERVICE_NAME, 'journal', journal_ids)
+    sdk_tasks.check_tasks_updated(
+        FOLDERED_SERVICE_NAME, 'journal', journal_ids)
     sdk_tasks.check_tasks_updated(FOLDERED_SERVICE_NAME, 'name', name_ids)
     sdk_tasks.check_tasks_updated(FOLDERED_SERVICE_NAME, 'data', journal_ids)
 
@@ -315,10 +336,12 @@ def test_modify_app_config_rollback():
     expiry_ms = int(marathon_config['env'][app_config_field])
     log.info('expiry ms: ' + str(expiry_ms))
     marathon_config['env'][app_config_field] = str(expiry_ms + 1)
-    sdk_marathon.update_app(FOLDERED_SERVICE_NAME, marathon_config, timeout=15 * 60)
+    sdk_marathon.update_app(FOLDERED_SERVICE_NAME,
+                            marathon_config, timeout=15 * 60)
 
     # Wait for journal nodes to be affected by the change
-    sdk_tasks.check_tasks_updated(FOLDERED_SERVICE_NAME, 'journal', journal_ids)
+    sdk_tasks.check_tasks_updated(
+        FOLDERED_SERVICE_NAME, 'journal', journal_ids)
     journal_ids = sdk_tasks.get_task_ids(FOLDERED_SERVICE_NAME, 'journal')
 
     log.info('old config: ')
@@ -327,7 +350,8 @@ def test_modify_app_config_rollback():
     sdk_marathon.update_app(FOLDERED_SERVICE_NAME, old_config)
 
     # Wait for the journal nodes to return to their old configuration
-    sdk_tasks.check_tasks_updated(FOLDERED_SERVICE_NAME, 'journal', journal_ids)
+    sdk_tasks.check_tasks_updated(
+        FOLDERED_SERVICE_NAME, 'journal', journal_ids)
     config.check_healthy(service_name=FOLDERED_SERVICE_NAME)
 
     marathon_config = sdk_marathon.get_config(FOLDERED_SERVICE_NAME)
@@ -339,14 +363,15 @@ def test_modify_app_config_rollback():
 
 @pytest.mark.sanity
 @pytest.mark.metrics
-@pytest.mark.local
 @sdk_utils.dcos_1_9_or_higher
 def test_metrics():
-    sdk_metrics.wait_for_any_metrics(
+    sdk_metrics.wait_for_service_metrics(
         config.PACKAGE_NAME,
         FOLDERED_SERVICE_NAME,
         "journal-0-node",
-        config.DEFAULT_HDFS_TIMEOUT)
+        config.DEFAULT_HDFS_TIMEOUT,
+        config.EXPECTED_METRICS
+    )
 
 
 def replace_name_node(index):
@@ -362,6 +387,8 @@ def replace_name_node(index):
 
     config.expect_recovery(service_name=FOLDERED_SERVICE_NAME)
 
-    sdk_tasks.check_tasks_updated(FOLDERED_SERVICE_NAME, name_node_name, name_id)
-    sdk_tasks.check_tasks_not_updated(FOLDERED_SERVICE_NAME, 'journal', journal_ids)
+    sdk_tasks.check_tasks_updated(
+        FOLDERED_SERVICE_NAME, name_node_name, name_id)
+    sdk_tasks.check_tasks_not_updated(
+        FOLDERED_SERVICE_NAME, 'journal', journal_ids)
     sdk_tasks.check_tasks_not_updated(FOLDERED_SERVICE_NAME, 'data', data_ids)
