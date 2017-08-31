@@ -206,13 +206,16 @@ def test_state_properties_get():
 @retrying.retry(
     wait_fixed=10000,
     stop_max_delay=120000,
-    retry_on_result=lambda res: res is False,
-    retry_on_exception=lambda ex: False if "failed: 409 Conflict" in ex.args[0] else True)
+    retry_on_result=lambda res: res is False)
 def wait_for_refresh_cache_fails_409conflict():
     """caching disabled, refresh_cache should fail with a
     409 error (eventually, once scheduler is up)
     """
-    sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'state refresh_cache')
+    try:
+        sdk_cmd.svc_cli(config.PACKAGE_NAME, FOLDERED_SERVICE_NAME, 'state refresh_cache')
+    except Exception as ex:
+        if "failed: 409 Conflict" in ex.args[0]:
+            return True
     return False
 
 
