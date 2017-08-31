@@ -117,6 +117,13 @@ def _get_universe_url():
     assert False, "Unable to find 'Universe' in list of repos: {}".format(repositories)
 
 
+@retrying.retry(
+    wait_fixed=10000,
+    stop_max_delay=300000)
+def wait_for_suppressed_service(service_name):
+    assert sdk_api.is_suppressed(service_name)
+
+
 def _upgrade_or_downgrade(
         package_name,
         to_package_version,
@@ -167,10 +174,7 @@ def _upgrade_or_downgrade(
                      package_name, service_name)
         else:
             log.info("Waiting for %s/%s to be suppressed...", package_name, service_name)
-            shakedown.wait_for(
-                lambda: sdk_api.is_suppressed(service_name),
-                noisy=True,
-                timeout_seconds=5 * 60)
+            wait_for_suppressed_service(service_name)
 
 
 def _get_pkg_version(package_name):

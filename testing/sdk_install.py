@@ -38,6 +38,13 @@ def retried_shakedown_install(
         expected_running_tasks=expected_running_tasks)
 
 
+@retry(
+    wait_fixed=10000,
+    stop_max_delay=300000)
+def wait_for_suppressed_service(service_name):
+    assert sdk_api.is_suppressed(service_name)
+
+
 def install(
         package_name,
         service_name,
@@ -76,10 +83,7 @@ def install(
                      package_name, service_name)
         else:
             log.info("Waiting for %s/%s to be suppressed...", package_name, service_name)
-            shakedown.wait_for(
-                lambda: sdk_api.is_suppressed(service_name),
-                noisy=True,
-                timeout_seconds=5 * 60)
+            wait_for_suppressed_service(service_name)
 
     log.info('Installed {}/{} after {}'.format(
         package_name, service_name, shakedown.pretty_duration(time.time() - start)))
