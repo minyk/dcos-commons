@@ -1,0 +1,4 @@
+PACKAGE_NAME = 'redis'
+SERVICE_NAME = 'redis'
+DEFAULT_TASK_COUNT = 1
+
