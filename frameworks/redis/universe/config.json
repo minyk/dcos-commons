@@ -3,7 +3,7 @@
     "properties": {
       "service": {
         "type": "object",
-        "description": "DC/OS service configuration properties",
+        "description": "DC/OS Redis service configuration properties",
         "properties": {
           "name": {
             "title": "Service name",
@@ -37,11 +37,6 @@
             "type": "string",
             "default": "dcos"
           },
-          "virtual_network_plugin_labels": {
-            "description": "Labels to pass to the virtual network plugin. Comma-separated key:value pairs. For example: k_0:v_0,k_1:v_1,...,k_n:v_n",
-            "type": "string",
-            "default": ""
-          },
           "service_account_secret": {
             "title": "Credential secret name (optional)",
             "description": "Name of the Secret Store credentials to use for DC/OS service authentication. This should be left empty unless service authentication is needed.",
@@ -62,14 +57,14 @@
         ]
       },
       "node": {
-        "description": "Template pod configuration properties",
+        "description": "Node Configuration properties",
         "type": "object",
         "properties": {
           "count": {
-            "title": "Node count",
+            "title": "Slave Node count",
             "description": "Number of Template pods to run",
             "type": "integer",
-            "default":1
+            "default":2
           },
           "placement_constraint": {
             "title": "Placement constraint",
@@ -87,31 +82,81 @@
             "title": "Memory size (MB)",
             "description": "Template pod mem requirements (in MB)",
             "type": "integer",
-            "default":252
-          },
-          "disk": {
-            "title": "Disk size (MB)",
-            "description": "Template pod persistent disk requirements (in MB)",
-            "type": "integer",
-            "default":25
-          },
-          "disk_type": {
-            "title": "Disk type [ROOT, MOUNT]",
-            "description": "Mount volumes require preconfiguration in DC/OS",
-            "enum": [
-              "ROOT",
-              "MOUNT"
-            ],
-            "default": "ROOT"
+            "default":64
           }
         },
         "required":[
           "count",
           "cpus",
-          "mem",
-          "disk",
-          "disk_type"
+          "mem"
         ]
+      },
+      "redis": {
+        "description": "Redis configurations",
+        "type": "object",
+        "properties": {
+          "tcp-backlog": {
+            "title": "tcp-backlog",
+            "description": "tcp-backlog",
+            "type": "integer",
+            "default": 511
+          },
+          "timeout": {
+            "title": "client timeout",
+            "description": "client timeout. 0 to disable",
+            "type": "integer",
+            "default": 0
+          },
+          "tcp-keepalive": {
+            "title": "tcp-keepalive",
+            "description": "tcp-keepalive in seconds.",
+            "type": "integer",
+            "default": 300
+          },
+          "loglevel": {
+            "title": "loglevel",
+            "description": "loglevel",
+            "type": "string",
+            "enum": ["debug", "verbose", "notice", "warning"],
+            "default": "notice"
+          },
+          "databases": {
+            "title": "number of databases",
+            "description": "number of databases",
+            "type": "integer",
+            "default": 16
+          }
+        }
+      },
+      "redis-sentinel": {
+        "description": "Redis sentinel configurations. Experts only.",
+        "type": "object",
+        "properties": {
+          "quorum": {
+            "title": "Slave Quorum",
+            "description": "Quorum number",
+            "type": "integer",
+            "default": 2
+          },
+          "down-after": {
+            "title": "down-after-milliseconds",
+            "description": "master down after in milliseconds",
+            "type": "integer",
+            "default": 60000
+          },
+          "failover-timeout": {
+            "title": "failover-timeout",
+            "description": "failover-timeout",
+            "type": "integer",
+            "default": 180000
+          },
+          "parallel-syncs": {
+            "title": "parallel-syncs",
+            "description": "parallel-syncs",
+            "type": "integer",
+            "default": 1
+          }
+        }
       }
     }
 }

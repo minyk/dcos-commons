@@ -3,22 +3,145 @@ scheduler:
   principal: {{FRAMEWORK_PRINCIPAL}}
   user: {{FRAMEWORK_USER}}
 pods:
-  redis:
-    count: {{NODE_COUNT}}
+  master:
+    uris:
+      - {{BOOTSTRAP_URI}}
+    count: 1
     placement: {{NODE_PLACEMENT}}
-    {{#ENABLE_VIRTUAL_NETWORK}}
-    networks:
-      {{VIRTUAL_NETWORK_NAME}}:
-        labels: {{VIRTUAL_NETWORK_PLUGIN_LABELS}}
-    {{/ENABLE_VIRTUAL_NETWORK}}
+    container:
+      image-name: redis:4.0.1-alpine
+      {{#ENABLE_VIRTUAL_NETWORK}}
+      networks:
+        {{VIRTUAL_NETWORK_NAME}}:
+      {{/ENABLE_VIRTUAL_NETWORK}}
+      rlimits:
+        RLIMIT_NOFILE:
+          soft: 128000
+          hard: 128000
     tasks:
-      node:
+      redis-server:
         goal: RUNNING
-        cmd: "echo redis >> redis-container-path/output && sleep $SLEEP_DURATION"
+        cmd: "cd ${MESOS_SANDBOX} && ./bootstrap -print-env=true && /usr/local/bin/redis-server ./redis.conf"
         cpus: {{NODE_CPUS}}
         memory: {{NODE_MEM}}
-        volume:
-          path: "redis-container-path"
-          type: {{NODE_DISK_TYPE}}
-          size: {{NODE_DISK}}
+        ports:
+          client:
+            port: 6379
+        configs:
+          redis-conf:
+            template: "{{CONFIG_TEMPLATE_PATH}}/redis.conf.mustache"
+            dest: "redis.conf"
         env:
+          SLAVES: {{NODE_COUNT}}
+          REDIS_CLIENT_PORT: 6379
+          REDIS_MASTER_DN: "master-0-redis-server.{{FRAMEWORK_NAME}}.autoip.dcos.thisdcos.directory"
+          REDIS_CONF_TCP_BACKLOG: {{REDIS_CONF_TCP_BACKLOG}}
+          REDIS_CONF_TIMEOUT: {{REDIS_CONF_TIMEOUT}}
+          REDIS_CONF_TCP_KEEPALIVE: {{REDIS_CONF_TCP_KEEPALIVE}}
+          REDIS_CONF_LOGLEVEL: {{REDIS_CONF_LOGLEVEL}}
+          REDIS_CONF_DATABASES: {{REDIS_CONF_DATABASES}}
+          REDIS_SENTINEL_CONF_QUORUM: {{REDIS_SENTINEL_CONF_QUORUM}}
+          REDIS_SENTINEL_CONF_DOWN_AFTER: {{REDIS_SENTINEL_CONF_DOWN_AFTER}}
+          REDIS_SENTINEL_CONF_FAILOVER_TIMEOUT: {{REDIS_SENTINEL_CONF_FAILOVER_TIMEOUT}}
+          REDIS_SENTINEL_CONF_PARALLEL_SYNCS: {{REDIS_SENTINEL_CONF_PARALLEL_SYNCS}}
+      redis-sentinel:
+        goal: RUNNING
+        cmd: "cd ${MESOS_SANDBOX} && ./bootstrap -print-env=true -resolve=true -resolve-hosts=${REDIS_MASTER_DN} && /usr/local/bin/redis-server ./redis-sentinel.conf --sentinel"
+        cpus: 0.1
+        memory: 32
+        ports:
+          sentinel:
+            port: 26379
+        configs:
+          sentinel-conf:
+            template: "{{CONFIG_TEMPLATE_PATH}}/redis-sentinel.conf.mustache"
+            dest: "redis-sentinel.conf"
+        env:
+          REDIS_SENTINEL_PORT: 26379
+          REDIS_CLIENT_PORT: 6379
+          REDIS_MASTER_DN: "master-0-redis-server.{{FRAMEWORK_NAME}}.autoip.dcos.thisdcos.directory"
+          REDIS_CONF_TCP_BACKLOG: {{REDIS_CONF_TCP_BACKLOG}}
+          REDIS_CONF_TIMEOUT: {{REDIS_CONF_TIMEOUT}}
+          REDIS_CONF_TCP_KEEPALIVE: {{REDIS_CONF_TCP_KEEPALIVE}}
+          REDIS_CONF_LOGLEVEL: {{REDIS_CONF_LOGLEVEL}}
+          REDIS_CONF_DATABASES: {{REDIS_CONF_DATABASES}}
+          REDIS_SENTINEL_CONF_QUORUM: {{REDIS_SENTINEL_CONF_QUORUM}}
+          REDIS_SENTINEL_CONF_DOWN_AFTER: {{REDIS_SENTINEL_CONF_DOWN_AFTER}}
+          REDIS_SENTINEL_CONF_FAILOVER_TIMEOUT: {{REDIS_SENTINEL_CONF_FAILOVER_TIMEOUT}}
+          REDIS_SENTINEL_CONF_PARALLEL_SYNCS: {{REDIS_SENTINEL_CONF_PARALLEL_SYNCS}}
+  slaves:
+    uris:
+      - {{BOOTSTRAP_URI}}
+    count: {{NODE_COUNT}}
+    placement: {{NODE_PLACEMENT}}
+    container:
+      image-name: redis:4.0.1-alpine
+      {{#ENABLE_VIRTUAL_NETWORK}}
+      networks:
+        {{VIRTUAL_NETWORK_NAME}}:
+      {{/ENABLE_VIRTUAL_NETWORK}}
+      rlimits:
+        RLIMIT_NOFILE:
+          soft: 128000
+          hard: 128000
+    tasks:
+      redis-server:
+        goal: RUNNING
+        cmd: "cd ${MESOS_SANDBOX} && ./bootstrap -print-env=true -resolve=true -resolve-hosts=${REDIS_MASTER_DN},${TASK_NAME}.${FRAMEWORK_HOST} && /usr/local/bin/redis-server ./redis.conf --slaveof ${REDIS_MASTER_DN} ${REDIS_CLIENT_PORT}"
+        cpus: {{NODE_CPUS}}
+        memory: {{NODE_MEM}}
+        ports:
+          client:
+            port: 6379
+        configs:
+          redis-conf:
+            template: "{{CONFIG_TEMPLATE_PATH}}/redis.conf.mustache"
+            dest: "redis.conf"
+        env:
+          SLAVES: {{NODE_COUNT}}
+          REDIS_CLIENT_PORT: 6379
+          REDIS_MASTER_DN: "master-0-redis-server.{{FRAMEWORK_NAME}}.autoip.dcos.thisdcos.directory"
+          REDIS_CONF_TCP_BACKLOG: {{REDIS_CONF_TCP_BACKLOG}}
+          REDIS_CONF_TIMEOUT: {{REDIS_CONF_TIMEOUT}}
+          REDIS_CONF_TCP_KEEPALIVE: {{REDIS_CONF_TCP_KEEPALIVE}}
+          REDIS_CONF_LOGLEVEL: {{REDIS_CONF_LOGLEVEL}}
+          REDIS_CONF_DATABASES: {{REDIS_CONF_DATABASES}}
+          REDIS_SENTINEL_CONF_QUORUM: {{REDIS_SENTINEL_CONF_QUORUM}}
+          REDIS_SENTINEL_CONF_DOWN_AFTER: {{REDIS_SENTINEL_CONF_DOWN_AFTER}}
+          REDIS_SENTINEL_CONF_FAILOVER_TIMEOUT: {{REDIS_SENTINEL_CONF_FAILOVER_TIMEOUT}}
+          REDIS_SENTINEL_CONF_PARALLEL_SYNCS: {{REDIS_SENTINEL_CONF_PARALLEL_SYNCS}}
+      redis-sentinel:
+        goal: RUNNING
+        cmd: "cd ${MESOS_SANDBOX} && ./bootstrap -print-env=true -resolve=true -resolve-hosts=${REDIS_MASTER_DN},${TASK_NAME}.${FRAMEWORK_HOST} && /usr/local/bin/redis-server ./redis-sentinel.conf --sentinel"
+        cpus: 0.1
+        memory: 32
+        ports:
+          sentinel:
+            port: 26379
+        configs:
+          sentinel-conf:
+            template: "{{CONFIG_TEMPLATE_PATH}}/redis-sentinel.conf.mustache"
+            dest: "redis-sentinel.conf"
+        env:
+          REDIS_SENTINEL_PORT: 26379
+          REDIS_CLIENT_PORT: 6379
+          REDIS_MASTER_DN: "master-0-redis-server.{{FRAMEWORK_NAME}}.autoip.dcos.thisdcos.directory"
+          REDIS_CONF_TCP_BACKLOG: {{REDIS_CONF_TCP_BACKLOG}}
+          REDIS_CONF_TIMEOUT: {{REDIS_CONF_TIMEOUT}}
+          REDIS_CONF_TCP_KEEPALIVE: {{REDIS_CONF_TCP_KEEPALIVE}}
+          REDIS_CONF_LOGLEVEL: {{REDIS_CONF_LOGLEVEL}}
+          REDIS_CONF_DATABASES: {{REDIS_CONF_DATABASES}}
+          REDIS_SENTINEL_CONF_QUORUM: {{REDIS_SENTINEL_CONF_QUORUM}}
+          REDIS_SENTINEL_CONF_DOWN_AFTER: {{REDIS_SENTINEL_CONF_DOWN_AFTER}}
+          REDIS_SENTINEL_CONF_FAILOVER_TIMEOUT: {{REDIS_SENTINEL_CONF_FAILOVER_TIMEOUT}}
+          REDIS_SENTINEL_CONF_PARALLEL_SYNCS: {{REDIS_SENTINEL_CONF_PARALLEL_SYNCS}}
+plans:
+  deploy:
+    strategy: serial
+    phases:
+      master-phase:
+        strategy: serial
+        pod: master
+      slaves-phase:
+        strategy: serial
+        pod: slaves

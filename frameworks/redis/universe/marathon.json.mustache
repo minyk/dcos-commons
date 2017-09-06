@@ -1,6 +1,6 @@
 {
   "id": "{{service.name}}",
-  "cpus": 1.0,
+  "cpus": 0.5,
   "mem": 1024,
   "instances": 1,
   "cmd": "export LD_LIBRARY_PATH=$MESOS_SANDBOX/libmesos-bundle/lib:$LD_LIBRARY_PATH; export MESOS_NATIVE_JAVA_LIBRARY=$(ls $MESOS_SANDBOX/libmesos-bundle/lib/libmesos-*.so); export JAVA_HOME=$(ls -d $MESOS_SANDBOX/jre*/); export JAVA_HOME=${JAVA_HOME%/}; export PATH=$(ls -d $JAVA_HOME/bin):$PATH &&  export JAVA_OPTS=\"-Xms256M -Xmx512M -XX:-HeapDumpOnOutOfMemoryError\" &&  ./redis-scheduler/bin/redis ./redis-scheduler/svc.yml",
@@ -26,6 +26,7 @@
     "FRAMEWORK_USER": "{{service.user}}",
     "FRAMEWORK_PRINCIPAL": "{{service.service_account}}",
     "FRAMEWORK_LOG_LEVEL": "{{service.log_level}}",
+    "BOOTSTRAP_URI": "{{resource.assets.uris.bootstrap-zip}}",
 
     "NODE_COUNT": "{{node.count}}",
     "NODE_PLACEMENT": "{{node.placement_constraint}}",
@@ -36,17 +37,28 @@
     {{/service.virtual_network_enabled}}
     "NODE_CPUS": "{{node.cpus}}",
     "NODE_MEM": "{{node.mem}}",
-    "NODE_DISK": "{{node.disk}}",
-    "NODE_DISK_TYPE": "{{node.disk_type}}",
 
+    "CONFIG_TEMPLATE_PATH": "redis-scheduler",
     "JAVA_URI": "{{resource.assets.uris.jre-tar-gz}}",
     "EXECUTOR_URI": "{{resource.assets.uris.executor-zip}}",
+    "REDIS_IMAGE": "{{resource.assets.container.docker.redis}}",
     {{#service.service_account_secret}}
     "DCOS_SERVICE_ACCOUNT_CREDENTIAL": { "secret": "serviceCredential" },
     "MESOS_MODULES": "{\"libraries\": [{\"file\": \"libdcos_security.so\", \"modules\": [{\"name\": \"com_mesosphere_dcos_ClassicRPCAuthenticatee\"}]}]}",
     "MESOS_AUTHENTICATEE": "com_mesosphere_dcos_ClassicRPCAuthenticatee",
     {{/service.service_account_secret}}
-    "LIBMESOS_URI": "{{resource.assets.uris.libmesos-bundle-tar-gz}}"
+    "LIBMESOS_URI": "{{resource.assets.uris.libmesos-bundle-tar-gz}}",
+
+    "REDIS_CONF_TCP_BACKLOG": "{{redis.tcp-backlog}}",
+    "REDIS_CONF_TIMEOUT": "{{redis.timeout}}",
+    "REDIS_CONF_TCP_KEEPALIVE": "{{redis.tcp-keepalive}}",
+    "REDIS_CONF_LOGLEVEL": "{{redis.loglevel}}",
+    "REDIS_CONF_DATABASES": "{{redis.databases}}",
+
+    "REDIS_SENTINEL_CONF_QUORUM": "{{redis-sentinel.quorum}}",
+    "REDIS_SENTINEL_CONF_DOWN_AFTER": "{{redis-sentinel.down-after}}",
+    "REDIS_SENTINEL_CONF_FAILOVER_TIMEOUT": "{{redis-sentinel.failover-timeout}}",
+    "REDIS_SENTINEL_CONF_PARALLEL_SYNCS": "{{redis-sentinel.parallel-syncs}}"
   },
   "uris": [
     "{{resource.assets.uris.jre-tar-gz}}",
