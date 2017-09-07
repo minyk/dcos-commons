@@ -1,4 +1,4 @@
-sentinel monitor mymaster master-0-redis-server.{{FRAMEWORK_NAME}}.autoip.dcos.thisdcos.directory {{REDIS_CLIENT_PORT}} {{REDIS_SENTINEL_CONF_QUORUM}}
+sentinel monitor mymaster master-0-redis.{{FRAMEWORK_HOST}} {{REDIS_CLIENT_PORT}} {{REDIS_SENTINEL_CONF_QUORUM}}
 sentinel down-after-milliseconds mymaster {{REDIS_SENTINEL_CONF_DOWN_AFTER}}
 sentinel failover-timeout mymaster {{REDIS_SENTINEL_CONF_FAILOVER_TIMEOUT}}
 sentinel parallel-syncs mymaster {{REDIS_SENTINEL_CONF_PARALLEL_SYNCS}}

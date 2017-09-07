@@ -5,11 +5,11 @@
       "libmesos-bundle-tar-gz": "{{libmesos-bundle-url}}",
       "scheduler-zip": "{{artifact-dir}}/redis-scheduler.zip",
       "bootstrap-zip": "{{artifact-dir}}/bootstrap.zip",
-      "executor-zip": "{{artifact-dir}}/executor.zip",
-      "redis-bin-tar-gz": "{{artifact-dir}}/redis-server-linux-amd64-4.0.1.tar.gz"
+      "executor-zip": "{{artifact-dir}}/executor.zip"
     },
     "container": {
       "docker": {
+        "hub-redis-4-alpine": "minyk/redis:4.0.1-alpine",
         "redis": "bootstrap.dcos.ajway.kr:5000/drake.min/redis:4.0.1-alpine"
       }
     }

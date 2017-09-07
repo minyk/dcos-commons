@@ -57,7 +57,7 @@
         ]
       },
       "node": {
-        "description": "Node Configuration properties",
+        "description": "Redis Slaves Configuration properties",
         "type": "object",
         "properties": {
           "count": {
@@ -132,6 +132,18 @@
         "description": "Redis sentinel configurations. Experts only.",
         "type": "object",
         "properties": {
+          "count": {
+            "title": "Sentinel Node count",
+            "description": "Number of sentinel pods to run. 3 or 5 is enough.",
+            "type": "integer",
+            "default":3
+          },
+          "placement_constraint": {
+            "title": "Placement constraint",
+            "description": "Marathon-style placement constraint for sentinel nodes. Example: 'hostname:UNIQUE'",
+            "type": "string",
+            "default": "hostname:UNIQUE"
+          },
           "quorum": {
             "title": "Slave Quorum",
             "description": "Quorum number",
@@ -156,7 +168,17 @@
             "type": "integer",
             "default": 1
           }
-        }
+        },
+        "required":[
+          "count",
+          "quorum"
+        ]
       }
-    }
+    },
+    "required": [
+      "service",
+      "node",
+      "redis",
+      "redis-sentinel"
+    ]
 }
