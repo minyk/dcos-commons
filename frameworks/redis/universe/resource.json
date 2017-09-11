@@ -9,8 +9,9 @@
     },
     "container": {
       "docker": {
-        "hub-redis-4-alpine": "minyk/redis:4.0.1-alpine",
-        "redis": "bootstrap.dcos.ajway.kr:5000/drake.min/redis:4.0.1-alpine"
+        "hub-redis-4-alpine": "library/redis:4.0.1-alpine",
+        "hub-redis-3-alpine": "library/redis:3.2.10-alpine",
+        "hub-corvus-alpine": "minyk/corvus:0.2.6-alpine"
       }
     }
   },

@@ -34,6 +34,10 @@ public class ServiceSpecTest extends BaseServiceSpecTest {
                 "REDIS_SENTINEL_CONF_PARALLEL_SYNCS", "1",
                 "REDIS_IMAGE", "bootstrap.dcos.ajway.kr:5000/drake.min/redis:4.0.1-alpine",
 
+                "CORVUS_COUNT", "1",
+                "CORVUS_CPUS", "0.1",
+                "CORVUS_MEMORY", "32",
+                "CORVUS_IMAGE", "minyk/corvus:0.2.6-alpine",
 
                 "SLEEP_DURATION", "1000");
     }

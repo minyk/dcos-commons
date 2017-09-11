@@ -30,7 +30,7 @@
           "virtual_network_enabled": {
             "description": "Enable virtual networking",
             "type": "boolean",
-            "default": false
+            "default": true
           },
           "virtual_network_name": {
             "description": "The name of the virtual network to join",
@@ -173,12 +173,79 @@
           "count",
           "quorum"
         ]
+      },
+      "corvus": {
+        "description": "A fast and lightweight Redis Cluster Proxy.",
+        "type": "object",
+        "properties": {
+          "count": {
+            "title": "Proxy Node count",
+            "description": "Number of corvus pods to run.",
+            "type": "integer",
+            "default":1
+          },
+          "placement_constraint": {
+            "title": "Placement constraint",
+            "description": "Marathon-style placement constraint for sentinel nodes. Example: 'hostname:UNIQUE'",
+            "type": "string",
+            "default": "hostname:UNIQUE"
+          },
+          "cpus": {
+            "title": "CPU count",
+            "description": "Template pod CPU requirements",
+            "type": "number",
+            "default":0.1
+          },
+          "mem": {
+            "title": "Memory size (MB)",
+            "description": "Template pod mem requirements (in MB)",
+            "type": "integer",
+            "default": 32
+          },
+          "loglevel": {
+            "description": "Log Level for Corvus",
+            "type": "string",
+            "enum": ["error", "warn", "info", "debug"],
+            "default": "info"
+          },
+          "client-timeout": {
+            "description": "Timeout in seconds for clients.",
+            "type": "integer",
+            "default": 30
+          },
+          "server-timeout": {
+            "description": "Timeout in seconds for redis servers",
+            "type": "integer",
+            "default": 5
+          },
+          "bufsize": {
+            "description": "Buffer size(KB) allocated each time avoiding fragments",
+            "type": "integer",
+            "default": 16384
+          },
+          "read-strategy": {
+            "description": "how to read from the cluster.",
+            "type": "string",
+            "enum": ["master", "read-slave-only", "both"]
+          },
+          "statd-metrics-enabled": {
+            "description": "Enable metrics.",
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required":[
+          "count",
+          "cpus",
+          "mem"
+        ]
       }
     },
     "required": [
       "service",
       "node",
       "redis",
-      "redis-sentinel"
+      "redis-sentinel",
+      "corvus"
     ]
 }

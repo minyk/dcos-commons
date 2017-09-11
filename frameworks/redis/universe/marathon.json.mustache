@@ -39,7 +39,8 @@
     "CONFIG_TEMPLATE_PATH": "redis-scheduler",
     "JAVA_URI": "{{resource.assets.uris.jre-tar-gz}}",
     "EXECUTOR_URI": "{{resource.assets.uris.executor-zip}}",
-    "REDIS_IMAGE": "{{resource.assets.container.docker.hub-redis-4-alpine}}",
+    "REDIS_IMAGE": "{{resource.assets.container.docker.hub-redis-3-alpine}}",
+    "CORVUS_IMAGE": "{{resource.assets.container.docker.hub-corvus-alpine}}",
     {{#service.service_account_secret}}
     "DCOS_SERVICE_ACCOUNT_CREDENTIAL": { "secret": "serviceCredential" },
     "MESOS_MODULES": "{\"libraries\": [{\"file\": \"libdcos_security.so\", \"modules\": [{\"name\": \"com_mesosphere_dcos_ClassicRPCAuthenticatee\"}]}]}",
@@ -60,7 +61,19 @@
     "REDIS_SENTINEL_CONF_QUORUM": "{{redis-sentinel.quorum}}",
     "REDIS_SENTINEL_CONF_DOWN_AFTER": "{{redis-sentinel.down-after}}",
     "REDIS_SENTINEL_CONF_FAILOVER_TIMEOUT": "{{redis-sentinel.failover-timeout}}",
-    "REDIS_SENTINEL_CONF_PARALLEL_SYNCS": "{{redis-sentinel.parallel-syncs}}"
+    "REDIS_SENTINEL_CONF_PARALLEL_SYNCS": "{{redis-sentinel.parallel-syncs}}",
+
+    "CORVUS_COUNT": "{{corvus.count}}",
+    "CORVUS_PLACEMENT": "{{corvus.placement_constraint}}",
+    "CORVUS_CPUS": "{{corvus.cpus}}",
+    "CORVUS_MEMORY": "{{corvus.mem}}",
+    "CORVUS_CONF_LOGLEVEL": "{{corvus.loglevel}}",
+    "CORVUS_CONF_CLIENT_TIMEOUT": "{{corvus.client-timeout}}",
+    "CORVUS_CONF_SERVER_TIMEOUT": "{{corvus.server-timeout}}",
+    "CORVUS_CONF_BUFFERSIZE": "{{corvus.bufsize}}",
+    "CORVUS_CONF_READ_STRATEGY": "{{corvus.read-strategy}}",
+    "CORVUS_CONF_STATSD_METRICS_ENABLED": "{{corvus.statd-metrics-enabled}}"
+
   },
   "uris": [
     "{{resource.assets.uris.jre-tar-gz}}",
