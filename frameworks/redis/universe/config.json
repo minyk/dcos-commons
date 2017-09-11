@@ -226,7 +226,8 @@
           "read-strategy": {
             "description": "how to read from the cluster.",
             "type": "string",
-            "enum": ["master", "read-slave-only", "both"]
+            "enum": ["master", "read-slave-only", "both"],
+            "default": "read-slave-only"
           },
           "statd-metrics-enabled": {
             "description": "Enable metrics.",
