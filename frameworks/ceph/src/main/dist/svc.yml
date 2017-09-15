@@ -1,0 +1,152 @@
+name: {{FRAMEWORK_NAME}}
+scheduler:
+  principal: {{FRAMEWORK_PRINCIPAL}}
+  user: {{FRAMEWORK_USER}}
+pods:
+  kvstore:
+    uris:
+      - {{BOOTSTRAP_URI}}
+    count: 1
+    container:
+      image-name: quay.io/coreos/etcd:v3.2.7
+    tasks:
+      etcd:
+        goal: RUNNING
+        cpus: 0.2
+        memory: 64
+        cmd: >
+                cd ${MESOS_SANDBOX} ;
+                ./bootstrap -print-env=true -resolve=true -resolve-hosts=${TASK_NAME}.${FRAMEWORK_HOST} ;
+                /usr/local/bin/etcd -name=test -listen-peer-urls=http://0.0.0.0:2380 -listen-client-urls=http://0.0.0.0:2379 -advertise-client-urls=http://${TASK_NAME}.{{FRAMEWORK_NAME}}.autoip.dcos.thisdcos.directory:2379
+        ports:
+          client:
+            port: 2379
+          peer:
+            port: 2380
+        env:
+          ETCD_ENABLE_V2: true
+  ceph-config:
+    uris:
+      - {{BOOTSTRAP_URI}}
+    count: 1
+    container:
+      image-name: {{CEPH_IMAGE}}
+    tasks:
+      populate-config:
+        goal: FINISHED
+        cpus: 0.1
+        memory: 64
+        cmd: >
+               cd ${MESOS_SANDBOX} ;
+               ./bootstrap -print-env=true -resolve=true -resolve-hosts=kvstore-0-etcd.${FRAMEWORK_HOST},${TASK_NAME}.${FRAMEWORK_HOST} ;
+               cd / && chmod a+x /variables_entrypoint.sh && ./entrypoint.sh populate_kvstore
+        configs:
+          ceph:
+            template: {{CONFIG_TEMPLATE_PATH}}/ceph.defaults.mustache
+            dest: /etc/ceph/ceph.defaults
+          variables:
+            template: {{CONFIG_TEMPLATE_PATH}}/variables_entrypoint.sh.mustache
+            dest: /variables_entrypoint.sh
+        env:
+          KV_TYPE: etcd
+          KV_IP: kvstore-0-etcd.ceph.autoip.dcos.thisdcos.directory
+          KV_PORT: 2379
+  monitor:
+    uris:
+      - {{BOOTSTRAP_URI}}
+    count: 1
+    container:
+      image-name: {{CEPH_IMAGE}}
+    tasks:
+      mon:
+        goal: RUNNING
+        cpus: 0.5
+        memory: 1024
+        cmd: >
+                cd ${MESOS_SANDBOX} ;
+                ./bootstrap -print-env=true -resolve=true -resolve-hosts=kvstore-0-etcd.${FRAMEWORK_HOST},${TASK_NAME}.${FRAMEWORK_HOST} ;
+                echo "Waiting for config initial during 10 seconds..." && sleep 10 ;
+                export MON_IP=${MESOS_CONTAINER_IP} ;
+                export MON_NAME=${TASK_NAME} ;
+                export HOSTNAME=${TASK_NAME}.${FRAMEWORK_HOST} ;
+                cd / && chmod a+x /variables_entrypoint.sh && ./entrypoint.sh mon
+        configs:
+          variables:
+            template: {{CONFIG_TEMPLATE_PATH}}/variables_entrypoint.sh.mustache
+            dest: /variables_entrypoint.sh
+        env:
+          KV_TYPE: etcd
+          KV_IP: kvstore-0-etcd.ceph.autoip.dcos.thisdcos.directory
+          KV_PORT: 2379
+          CEPH_PUBLIC_NETWORK: {{CEPH_PUBLIC_NETWORK}}
+          CEPH_CLUSTER_NETWORK: {{CEPH_CLUSTER_NETWORK}}
+        ports:
+          mon:
+            port: 6789
+  manager:
+    uris:
+      - {{BOOTSTRAP_URI}}
+    count: 1
+    container:
+      image-name: {{CEPH_IMAGE}}
+    tasks:
+      mgr:
+        goal: RUNNING
+        cpus: 0.5
+        memory: 1024
+        cmd: >
+               cd ${MESOS_SANDBOX} ;
+               ./bootstrap -print-env=true -resolve=true -resolve-hosts=kvstore-0-etcd.${FRAMEWORK_HOST},monitor-0-mon.${FRAMEWORK_HOST},${TASK_NAME}.${FRAMEWORK_HOST} ;
+               export MGR_IP=${MESOS_CONTAINER_IP} ;
+               export HOSTNAME=${TASK_NAME}.${FRAMEWORK_HOST} ;
+               cd / && chmod a+x /variables_entrypoint.sh && ./entrypoint.sh mgr
+        configs:
+          variables:
+            template: {{CONFIG_TEMPLATE_PATH}}/variables_entrypoint.sh.mustache
+            dest: /variables_entrypoint.sh
+        env:
+          KV_TYPE: etcd
+          KV_IP: kvstore-0-etcd.ceph.autoip.dcos.thisdcos.directory
+          KV_PORT: 2379
+          CEPH_PUBLIC_NETWORK: {{CEPH_PUBLIC_NETWORK}}
+          CEPH_CLUSTER_NETWORK: {{CEPH_CLUSTER_NETWORK}}
+        ports:
+          mgr-web:
+            port: 7000
+            env-key: MGR_PORT
+            advertise: true
+            vip:
+              port: 80
+  storage:
+    uris:
+      - {{BOOTSTRAP_URI}}
+    count: 2
+    container:
+      image-name: {{CEPH_IMAGE}}
+    tasks:
+      osd:
+        goal: RUNNING
+        cpus: 0.5
+        memory: 1024
+        cmd: >
+               cd ${MESOS_SANDBOX} ;
+               ./bootstrap -print-env=true -resolve=true -resolve-hosts=kvstore-0-etcd.${FRAMEWORK_HOST},monitor-0-mon.${FRAMEWORK_HOST},${TASK_NAME}.${FRAMEWORK_HOST} ;
+               export HOSTNAME=${TASK_NAME}.${FRAMEWORK_HOST} ;
+               cd / && chmod a+x /variables_entrypoint.sh && chmod a+x /osd_directory_prepare.sh && ./osd_directory_prepare.sh && ./entrypoint.sh osd_directory
+        configs:
+          variables:
+            template: {{CONFIG_TEMPLATE_PATH}}/variables_entrypoint.sh.mustache
+            dest: /variables_entrypoint.sh
+          prepare:
+            template: {{CONFIG_TEMPLATE_PATH}}/osd_directory_prepare.sh
+            dest: /osd_directory_prepare.sh
+        volume:
+          path: cephdata
+          size: 10000
+          type: ROOT
+        env:
+          KV_TYPE: etcd
+          KV_IP: kvstore-0-etcd.ceph.autoip.dcos.thisdcos.directory
+          KV_PORT: 2379
+          CEPH_PUBLIC_NETWORK: {{CEPH_PUBLIC_NETWORK}}
+          CEPH_CLUSTER_NETWORK: {{CEPH_CLUSTER_NETWORK}}

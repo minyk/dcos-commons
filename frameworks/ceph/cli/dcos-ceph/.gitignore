@@ -1,0 +1,6 @@
+dcos-*
+*.whl
+native-*
+.native-*
+vendor
+!vendor/vendor.json

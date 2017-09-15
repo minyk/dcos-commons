@@ -1,0 +1,117 @@
+{
+  "id": "{{service.name}}",
+  "cpus": 1.0,
+  "mem": 1024,
+  "instances": 1,
+  "cmd": "export LD_LIBRARY_PATH=$MESOS_SANDBOX/libmesos-bundle/lib:$LD_LIBRARY_PATH; export MESOS_NATIVE_JAVA_LIBRARY=$(ls $MESOS_SANDBOX/libmesos-bundle/lib/libmesos-*.so); export JAVA_HOME=$(ls -d $MESOS_SANDBOX/jre*/); export JAVA_HOME=${JAVA_HOME%/}; export PATH=$(ls -d $JAVA_HOME/bin):$PATH &&  export JAVA_OPTS=\"-Xms256M -Xmx512M -XX:-HeapDumpOnOutOfMemoryError\" &&  ./ceph-scheduler/bin/ceph ./ceph-scheduler/svc.yml",
+  "labels": {
+    "DCOS_COMMONS_API_VERSION": "v1",
+    "DCOS_COMMONS_UNINSTALL": "true",
+    "DCOS_PACKAGE_FRAMEWORK_NAME": "{{service.name}}",
+    "MARATHON_SINGLE_INSTANCE_APP": "true",
+    "DCOS_SERVICE_NAME": "{{service.name}}",
+    "DCOS_SERVICE_PORT_INDEX": "0",
+    "DCOS_SERVICE_SCHEME": "http"
+  },
+  {{#service.service_account_secret}}
+  "secrets": {
+    "serviceCredential": {
+      "source": "{{service.service_account_secret}}"
+    }
+  },
+  {{/service.service_account_secret}}
+  "env": {
+    "PACKAGE_NAME": "{{package-name}}",
+    "PACKAGE_VERSION": "{{package-version}}",
+    "PACKAGE_BUILD_TIME_EPOCH_MS": "{{package-build-time-epoch-ms}}",
+    "PACKAGE_BUILD_TIME_STR": "{{package-build-time-str}}",
+    "FRAMEWORK_NAME": "{{service.name}}",
+    "SLEEP_DURATION": "{{service.sleep}}",
+    "FRAMEWORK_USER": "{{service.user}}",
+    "FRAMEWORK_PRINCIPAL": "{{service.service_account}}",
+    "FRAMEWORK_LOG_LEVEL": "{{service.log_level}}",
+
+    {{#service.virtual_network_enabled}}
+    "ENABLE_VIRTUAL_NETWORK": "yes",
+    "VIRTUAL_NETWORK_NAME": "{{service.virtual_network_name}}",
+    "VIRTUAL_NETWORK_PLUGIN_LABELS": "{{service.virtual_network_plugin_labels}}",
+    {{/service.virtual_network_enabled}}
+
+    "JAVA_URI": "{{resource.assets.uris.jre-tar-gz}}",
+    "EXECUTOR_URI": "{{resource.assets.uris.executor-zip}}",
+    "BOOTSTRAP_URI": "{{resource.assets.uris.bootstrap-zip}}",
+    {{#service.service_account_secret}}
+    "DCOS_SERVICE_ACCOUNT_CREDENTIAL": { "secret": "serviceCredential" },
+    "MESOS_MODULES": "{\"libraries\": [{\"file\": \"libdcos_security.so\", \"modules\": [{\"name\": \"com_mesosphere_dcos_ClassicRPCAuthenticatee\"}]}]}",
+    "MESOS_AUTHENTICATEE": "com_mesosphere_dcos_ClassicRPCAuthenticatee",
+    {{/service.service_account_secret}}
+    "LIBMESOS_URI": "{{resource.assets.uris.libmesos-bundle-tar-gz}}",
+
+    "CEPH_IMAGE": "{{service.ceph_image}}",
+    "CEPH_PUBLIC_NETWORK": "{{ceph_global.public_network}}",
+    "CEPH_CLUSTER_NETWORK": "{{ceph_global.cluster_network}}",
+
+    "CEPH_MON_NODE_COUNT": "{{ceph_mon.count}}",
+    "CEPH_MON_NODE_PLACEMENT": "{{ceph_mon.placement_constraint}}",
+    "CEPH_MON_NODE_CPUS": "{{ceph_mon.cpus}}",
+    "CEPH_MON_NODE_MEM": "{{ceph_mon.mem}}",
+
+    "CEPH_OSD_NODE_COUNT": "{{ceph_osd.count}}",
+    "CEPH_OSD_NODE_PLACEMENT": "{{ceph_osd.placement_constraint}}",
+    "CEPH_OSD_NODE_CPUS": "{{ceph_osd.cpus}}",
+    "CEPH_OSD_NODE_MEM": "{{ceph_osd.mem}}",
+
+    "CEPH_MDS_NODE_COUNT": "{{ceph_mds.count}}",
+    "CEPH_MDS_NODE_PLACEMENT": "{{ceph_mds.placement_constraint}}",
+    "CEPH_MDS_NODE_CPUS": "{{ceph_mds.cpus}}",
+    "CEPH_MDS_NODE_MEM": "{{ceph_mds.mem}}",
+
+    "CEPH_MGR_NODE_COUNT": "{{ceph_mgr.count}}",
+    "CEPH_MGR_NODE_PLACEMENT": "{{ceph_mgr.placement_constraint}}",
+    "CEPH_MGR_NODE_CPUS": "{{ceph_mgr.cpus}}",
+    "CEPH_MGR_NODE_MEM": "{{ceph_mgr.mem}}",
+
+    "CEPH_RGW_NODE_COUNT": "{{ceph_rgw.count}}",
+    "CEPH_RGW_NODE_PLACEMENT": "{{ceph_rgw.placement_constraint}}",
+    "CEPH_RGW_NODE_CPUS": "{{ceph_rgw.cpus}}",
+    "CEPH_RGW_NODE_MEM": "{{ceph_rgw.mem}}"
+
+  },
+  "uris": [
+    "{{resource.assets.uris.jre-tar-gz}}",
+    "{{resource.assets.uris.scheduler-zip}}",
+    "{{resource.assets.uris.libmesos-bundle-tar-gz}}"
+  ],
+  "upgradeStrategy":{
+    "minimumHealthCapacity": 0,
+    "maximumOverCapacity": 0
+  },
+  "healthChecks": [
+    {
+      "protocol": "HTTP",
+      "path": "/v1/plans/deploy",
+      "gracePeriodSeconds": 900,
+      "intervalSeconds": 30,
+      "portIndex": 0,
+      "timeoutSeconds": 30,
+      "maxConsecutiveFailures": 0
+    },
+    {
+      "protocol": "HTTP",
+      "path": "/v1/plans/recovery",
+      "gracePeriodSeconds": 900,
+      "intervalSeconds": 30,
+      "portIndex": 0,
+      "timeoutSeconds": 30,
+      "maxConsecutiveFailures": 0
+    }
+  ],
+  "portDefinitions": [
+    {
+      "port": 0,
+      "protocol": "tcp",
+      "name": "api",
+      "labels": { "VIP_0": "/api.{{service.name}}:80" }
+    }
+  ]
+}

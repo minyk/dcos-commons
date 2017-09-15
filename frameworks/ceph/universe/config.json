@@ -1,0 +1,288 @@
+{
+  "type": "object",
+    "properties": {
+      "service": {
+        "type": "object",
+        "description": "DC/OS service configuration properties",
+        "properties": {
+          "name": {
+            "title": "Service name",
+            "description": "The name of the service instance",
+            "type": "string",
+            "default": "ceph"
+          },
+          "sleep": {
+            "description": "The sleep duration in seconds before tasks exit.",
+            "type": "number",
+            "default":1000
+          },
+          "user": {
+            "title": "User",
+            "description": "The user that the service will run as.",
+            "type": "string",
+            "default": "root"
+          },
+          "service_account": {
+            "description": "The service account for DC/OS service authentication. This is typically left empty to use the default unless service authentication is needed. The value given here is passed as the principal of Mesos framework.",
+            "type": "string",
+            "default": ""
+          },
+          "virtual_network_enabled": {
+            "description": "Enable virtual networking",
+            "type": "boolean",
+            "default": false
+          },
+          "virtual_network_name": {
+            "description": "The name of the virtual network to join",
+            "type": "string",
+            "default": "dcos"
+          },
+          "virtual_network_plugin_labels": {
+            "description": "Labels to pass to the virtual network plugin. Comma-separated key:value pairs. For example: k_0:v_0,k_1:v_1,...,k_n:v_n",
+            "type": "string",
+            "default": ""
+          },
+          "service_account_secret": {
+            "title": "Credential secret name (optional)",
+            "description": "Name of the Secret Store credentials to use for DC/OS service authentication. This should be left empty unless service authentication is needed.",
+            "type": "string",
+            "default": ""
+          },
+          "log_level": {
+            "description": "The log level for the DC/OS service.",
+            "type": "string",
+            "enum": ["OFF", "FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE", "ALL"],
+            "default": "INFO"
+          },
+          "ceph_image": {
+            "title": "Ceph Version",
+            "description": "Ceph Image to run. Currently 'tag-build-master-luminous-centos-7' tag is supported.",
+            "type": "string",
+            "default": "ceph/daemon:tag-build-master-luminous-centos-7"
+          }
+        },
+        "required":[
+          "name",
+          "sleep",
+          "user"
+        ]
+      },
+      "ceph_global": {
+        "description": "Ceph global configuration properties",
+        "type": "object",
+        "properties": {
+          "public_network": {
+            "title": "Ceph Public Network",
+            "description": "Network for public access. {IP}/{NETMASK}.",
+            "type": "string",
+            "default": "0.0.0.0/16"
+          },
+          "cluster_network": {
+            "title": "Ceph Cluster Network",
+            "description": "Network for cluster traffic. {IP}/{NETMASK}.",
+            "type": "string",
+            "default": "0.0.0.0/16"
+          },
+          "mon_osd_full_ratio": {
+            "title": "OSD Full Ratio",
+            "description": "Ratio for report OSD full.",
+            "type": "string",
+            "default": ".95"
+          }
+        },
+        "required":[
+          "mon_osd_full_ratio"
+        ]
+      },
+      "ceph_auth": {
+        "description": "Ceph Auth configuration properties",
+        "type": "object",
+        "properties": {
+          "auth_enabled": {
+            "title": "Auth enabled",
+            "description": "Check to enable auth.",
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required":[
+          "auth_enabled"
+        ]
+      },
+      "ceph_mon": {
+        "description": "Ceph monitor daemon configuration properties",
+        "type": "object",
+        "properties": {
+          "count": {
+            "title": "Node count",
+            "description": "Number of Ceph monitor daemons to run",
+            "type": "integer",
+            "default":2
+          },
+          "placement_constraint": {
+            "title": "Placement constraint",
+            "description": "Marathon-style placement constraint for nodes. Example: 'hostname:UNIQUE'",
+            "type": "string",
+            "default": "hostname:UNIQUE"
+          },
+          "cpus": {
+            "title": "CPU count",
+            "description": "Ceph monitor daemon CPU requirements",
+            "type": "number",
+            "default":0.1
+          },
+          "mem": {
+            "title": "Memory size (MB)",
+            "description": "Ceph monitor daemon mem requirements (in MB)",
+            "type": "integer",
+            "default":32
+          }
+        },
+        "required":[
+          "count",
+          "cpus",
+          "mem"
+        ]
+      },
+      "ceph_osd": {
+        "description": "Ceph OSD daemon configuration properties",
+        "type": "object",
+        "properties": {
+          "count": {
+            "title": "Node count",
+            "description": "Number of Ceph OSD daemons to run",
+            "type": "integer",
+            "default":1
+          },
+          "placement_constraint": {
+            "title": "Placement constraint",
+            "description": "Marathon-style placement constraint for nodes. Example: 'hostname:UNIQUE'",
+            "type": "string",
+            "default": ""
+          },
+          "cpus": {
+            "title": "CPU count",
+            "description": "Ceph OSD daemon CPU requirements",
+            "type": "number",
+            "default":0.5
+          },
+          "mem": {
+            "title": "Memory size (MB)",
+            "description": "Ceph OSD daemon mem requirements (in MB)",
+            "type": "integer",
+            "default":64
+          }
+        },
+        "required":[
+          "count",
+          "cpus",
+          "mem"
+        ]
+      },
+      "ceph_mds": {
+        "description": "Ceph MDS daemon configuration properties",
+        "type": "object",
+        "properties": {
+          "count": {
+            "title": "Node count",
+            "description": "Number of Ceph MDS daemons to run",
+            "type": "integer",
+            "default":1
+          },
+          "placement_constraint": {
+            "title": "Placement constraint",
+            "description": "Marathon-style placement constraint for nodes. Example: 'hostname:UNIQUE'",
+            "type": "string",
+            "default": ""
+          },
+          "cpus": {
+            "title": "CPU count",
+            "description": "Ceph MDS daemon CPU requirements",
+            "type": "number",
+            "default":0.1
+          },
+          "mem": {
+            "title": "Memory size (MB)",
+            "description": "Ceph MDS daemon mem requirements (in MB)",
+            "type": "integer",
+            "default":32
+          }
+        },
+        "required":[
+          "count",
+          "cpus",
+          "mem"
+        ]
+      },
+      "ceph_mgr": {
+        "description": "Ceph MGR daemon configuration properties",
+        "type": "object",
+        "properties": {
+          "count": {
+            "title": "Node count",
+            "description": "Number of Ceph MGR daemons to run",
+            "type": "integer",
+            "default":1
+          },
+          "placement_constraint": {
+            "title": "Placement constraint",
+            "description": "Marathon-style placement constraint for nodes. Example: 'hostname:UNIQUE'",
+            "type": "string",
+            "default": ""
+          },
+          "cpus": {
+            "title": "CPU count",
+            "description": "Ceph MGR daemon CPU requirements",
+            "type": "number",
+            "default":0.1
+          },
+          "mem": {
+            "title": "Memory size (MB)",
+            "description": "Ceph MGR daemon mem requirements (in MB)",
+            "type": "integer",
+            "default":32
+          }
+        },
+        "required":[
+          "count",
+          "cpus",
+          "mem"
+        ]
+      },
+      "ceph_rgw": {
+        "description": "Ceph RGW daemon configuration properties",
+        "type": "object",
+        "properties": {
+          "count": {
+            "title": "Node count",
+            "description": "Number of Ceph MGR daemons to run",
+            "type": "integer",
+            "default":1
+          },
+          "placement_constraint": {
+            "title": "Placement constraint",
+            "description": "Marathon-style placement constraint for nodes. Example: 'hostname:UNIQUE'",
+            "type": "string",
+            "default": ""
+          },
+          "cpus": {
+            "title": "CPU count",
+            "description": "Ceph MGR daemon CPU requirements",
+            "type": "number",
+            "default":0.1
+          },
+          "mem": {
+            "title": "Memory size (MB)",
+            "description": "Ceph MGR daemon mem requirements (in MB)",
+            "type": "integer",
+            "default":32
+          }
+        },
+        "required":[
+          "count",
+          "cpus",
+          "mem"
+        ]
+      }
+    }
+}
