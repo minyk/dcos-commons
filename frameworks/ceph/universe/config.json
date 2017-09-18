@@ -59,6 +59,24 @@
             "description": "Ceph Image to run. Currently 'tag-build-master-luminous-centos-7' tag is supported.",
             "type": "string",
             "default": "ceph/daemon:tag-build-master-luminous-centos-7"
+          },
+          "kvstore_ip": {
+            "title": "Etcd IP Address",
+            "description": "Address for keyvalue store for Ceph cluster. If dev mode is enabled, this value will be ignored.",
+            "type": "string",
+            "default": "etcd.marathon.mesos"
+          },
+          "kvstore_port": {
+            "title": "Etcd client port",
+            "description": "Client port for keyvalue store for Ceph cluster. If dev mode is enabled, this value will be ignored.",
+            "type": "integer",
+            "default": 2379
+          },
+          "dev_enabled": {
+            "title": "Dev Mode",
+            "description": "Dev mode for Ceph Scheduler.",
+            "type": "boolean",
+            "default": true
           }
         },
         "required":[
@@ -135,7 +153,7 @@
             "title": "Memory size (MB)",
             "description": "Ceph monitor daemon mem requirements (in MB)",
             "type": "integer",
-            "default":32
+            "default":512
           }
         },
         "required":[
@@ -152,13 +170,13 @@
             "title": "Node count",
             "description": "Number of Ceph OSD daemons to run",
             "type": "integer",
-            "default":1
+            "default":3
           },
           "placement_constraint": {
             "title": "Placement constraint",
             "description": "Marathon-style placement constraint for nodes. Example: 'hostname:UNIQUE'",
             "type": "string",
-            "default": ""
+            "default": "hostname:UNIQUE"
           },
           "cpus": {
             "title": "CPU count",
@@ -170,42 +188,7 @@
             "title": "Memory size (MB)",
             "description": "Ceph OSD daemon mem requirements (in MB)",
             "type": "integer",
-            "default":64
-          }
-        },
-        "required":[
-          "count",
-          "cpus",
-          "mem"
-        ]
-      },
-      "ceph_mds": {
-        "description": "Ceph MDS daemon configuration properties",
-        "type": "object",
-        "properties": {
-          "count": {
-            "title": "Node count",
-            "description": "Number of Ceph MDS daemons to run",
-            "type": "integer",
-            "default":1
-          },
-          "placement_constraint": {
-            "title": "Placement constraint",
-            "description": "Marathon-style placement constraint for nodes. Example: 'hostname:UNIQUE'",
-            "type": "string",
-            "default": ""
-          },
-          "cpus": {
-            "title": "CPU count",
-            "description": "Ceph MDS daemon CPU requirements",
-            "type": "number",
-            "default":0.1
-          },
-          "mem": {
-            "title": "Memory size (MB)",
-            "description": "Ceph MDS daemon mem requirements (in MB)",
-            "type": "integer",
-            "default":32
+            "default":1024
           }
         },
         "required":[
@@ -234,13 +217,54 @@
             "title": "CPU count",
             "description": "Ceph MGR daemon CPU requirements",
             "type": "number",
-            "default":0.1
+            "default":0.5
           },
           "mem": {
             "title": "Memory size (MB)",
             "description": "Ceph MGR daemon mem requirements (in MB)",
             "type": "integer",
-            "default":32
+            "default":1024
+          }
+        },
+        "required":[
+          "count",
+          "cpus",
+          "mem"
+        ]
+      },
+      "ceph_mds": {
+        "description": "Ceph MDS daemon configuration properties",
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "title": "MDS Enable",
+            "description": "Enable Ceph Metadata Service.",
+            "type": "boolean",
+            "default": false
+          },
+          "count": {
+            "title": "Node count",
+            "description": "Number of Ceph MDS daemons to run",
+            "type": "integer",
+            "default":1
+          },
+          "placement_constraint": {
+            "title": "Placement constraint",
+            "description": "Marathon-style placement constraint for nodes. Example: 'hostname:UNIQUE'",
+            "type": "string",
+            "default": ""
+          },
+          "cpus": {
+            "title": "CPU count",
+            "description": "Ceph MDS daemon CPU requirements",
+            "type": "number",
+            "default":0.1
+          },
+          "mem": {
+            "title": "Memory size (MB)",
+            "description": "Ceph MDS daemon mem requirements (in MB)",
+            "type": "integer",
+            "default":256
           }
         },
         "required":[
@@ -253,9 +277,15 @@
         "description": "Ceph RGW daemon configuration properties",
         "type": "object",
         "properties": {
+          "enabled": {
+            "title": "RGW Enable",
+            "description": "Enable Ceph RGW Service.",
+            "type": "boolean",
+            "default": true
+          },
           "count": {
             "title": "Node count",
-            "description": "Number of Ceph MGR daemons to run",
+            "description": "Number of Ceph RGW daemons to run",
             "type": "integer",
             "default":1
           },
@@ -267,15 +297,69 @@
           },
           "cpus": {
             "title": "CPU count",
-            "description": "Ceph MGR daemon CPU requirements",
+            "description": "Ceph RGW daemon CPU requirements",
             "type": "number",
-            "default":0.1
+            "default":0.5
           },
           "mem": {
             "title": "Memory size (MB)",
-            "description": "Ceph MGR daemon mem requirements (in MB)",
+            "description": "Ceph RGW daemon mem requirements (in MB)",
             "type": "integer",
-            "default":32
+            "default":256
+          },
+          "zonegroup": {
+            "title": "Zone Group",
+            "description": "Zone group for Ceph RGW. Currently, \"ap(asia-pacific)\" and \"us(united-states)\" are available.",
+            "type": "string",
+            "default": "ap",
+            "enum": ["ap", "us"]
+          },
+          "zone": {
+            "title": "Zone",
+            "description": "Zone for Ceph RGW.",
+            "type": "string",
+            "default": "ap-northeast-2"
+          }
+        },
+        "required":[
+          "count",
+          "cpus",
+          "mem"
+        ]
+      },
+      "ceph_restapi": {
+        "description": "Ceph REST API daemon configuration properties",
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "title": "REST API Enable",
+            "description": "Enable Ceph RESTAPI Service.",
+            "type": "boolean",
+            "default": true
+          },
+          "count": {
+            "title": "Node count",
+            "description": "Number of Ceph RESTAPI daemons to run",
+            "type": "integer",
+            "default":1
+          },
+          "placement_constraint": {
+            "title": "Placement constraint",
+            "description": "Marathon-style placement constraint for nodes. Example: 'hostname:UNIQUE'",
+            "type": "string",
+            "default": ""
+          },
+          "cpus": {
+            "title": "CPU count",
+            "description": "Ceph RESTAPI daemon CPU requirements",
+            "type": "number",
+            "default":0.5
+          },
+          "mem": {
+            "title": "Memory size (MB)",
+            "description": "Ceph RESTAPI daemon mem requirements (in MB)",
+            "type": "integer",
+            "default":256
           }
         },
         "required":[

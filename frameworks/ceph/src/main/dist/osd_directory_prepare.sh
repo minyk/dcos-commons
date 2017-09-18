@@ -25,7 +25,7 @@ ceph osd create ${OSD_UUID} > ${OSD_ID_FILE}
 OSD_ID=`cat ${OSD_ID_FILE}`
 
 # 4.
-chown -R ceph:ceph ${MESOS_SANDBOX}/cephdata && ln -sf ${MESOS_SANDBOX}/cephdata /var/lib/ceph/osd/ceph-${OSD_ID} ;
+chown -R ceph:root ${MESOS_SANDBOX}/cephdata && ln -sf ${MESOS_SANDBOX}/cephdata /var/lib/ceph/osd/ceph-${OSD_ID} ;
 
 # 6.
 ceph-osd -i ${OSD_ID} --mkfs --mkkey --osd-uuid ${OSD_UUID}

@@ -38,7 +38,7 @@ pods:
         memory: 64
         cmd: >
                cd ${MESOS_SANDBOX} ;
-               ./bootstrap -print-env=true -resolve=true -resolve-hosts=kvstore-0-etcd.${FRAMEWORK_HOST},${TASK_NAME}.${FRAMEWORK_HOST} ;
+               ./bootstrap -print-env=true -resolve=true -resolve-hosts=${KV_IP},${TASK_NAME}.${FRAMEWORK_HOST} ;
                cd / && chmod a+x /variables_entrypoint.sh && ./entrypoint.sh populate_kvstore
         configs:
           ceph:
@@ -49,22 +49,23 @@ pods:
             dest: /variables_entrypoint.sh
         env:
           KV_TYPE: etcd
-          KV_IP: kvstore-0-etcd.ceph.autoip.dcos.thisdcos.directory
-          KV_PORT: 2379
+          KV_IP: {{CEPH_KV_IP}}
+          KV_PORT: {{CEPH_KV_PORT}}
   monitor:
     uris:
       - {{BOOTSTRAP_URI}}
-    count: 1
+    count: {{CEPH_MON_NODE_COUNT}}
+    placement: {{CEPH_MON_NODE_PLACEMENT}}
     container:
       image-name: {{CEPH_IMAGE}}
     tasks:
       mon:
         goal: RUNNING
-        cpus: 0.5
-        memory: 1024
+        cpus: {{CEPH_MON_NODE_CPUS}}
+        memory: {{CEPH_MON_NODE_MEM}}
         cmd: >
                 cd ${MESOS_SANDBOX} ;
-                ./bootstrap -print-env=true -resolve=true -resolve-hosts=kvstore-0-etcd.${FRAMEWORK_HOST},${TASK_NAME}.${FRAMEWORK_HOST} ;
+                ./bootstrap -print-env=true -resolve=true -resolve-hosts=${KV_IP},${TASK_NAME}.${FRAMEWORK_HOST} ;
                 echo "Waiting for config initial during 10 seconds..." && sleep 10 ;
                 export MON_IP=${MESOS_CONTAINER_IP} ;
                 export MON_NAME=${TASK_NAME} ;
@@ -76,8 +77,8 @@ pods:
             dest: /variables_entrypoint.sh
         env:
           KV_TYPE: etcd
-          KV_IP: kvstore-0-etcd.ceph.autoip.dcos.thisdcos.directory
-          KV_PORT: 2379
+          KV_IP: {{CEPH_KV_IP}}
+          KV_PORT: {{CEPH_KV_PORT}}
           CEPH_PUBLIC_NETWORK: {{CEPH_PUBLIC_NETWORK}}
           CEPH_CLUSTER_NETWORK: {{CEPH_CLUSTER_NETWORK}}
         ports:
@@ -86,17 +87,18 @@ pods:
   manager:
     uris:
       - {{BOOTSTRAP_URI}}
-    count: 1
+    count: {{CEPH_MGR_NODE_COUNT}}
+    placement: {{CEPH_MGR_NODE_PLACEMENT}}
     container:
       image-name: {{CEPH_IMAGE}}
     tasks:
       mgr:
         goal: RUNNING
-        cpus: 0.5
-        memory: 1024
+        cpus: {{CEPH_MGR_NODE_CPUS}}
+        memory: {{CEPH_MGR_NODE_MEM}}
         cmd: >
                cd ${MESOS_SANDBOX} ;
-               ./bootstrap -print-env=true -resolve=true -resolve-hosts=kvstore-0-etcd.${FRAMEWORK_HOST},monitor-0-mon.${FRAMEWORK_HOST},${TASK_NAME}.${FRAMEWORK_HOST} ;
+               ./bootstrap -print-env=true -resolve=true -resolve-hosts=${KV_IP},monitor-0-mon.${FRAMEWORK_HOST},${TASK_NAME}.${FRAMEWORK_HOST} ;
                export MGR_IP=${MESOS_CONTAINER_IP} ;
                export HOSTNAME=${TASK_NAME}.${FRAMEWORK_HOST} ;
                cd / && chmod a+x /variables_entrypoint.sh && ./entrypoint.sh mgr
@@ -106,8 +108,8 @@ pods:
             dest: /variables_entrypoint.sh
         env:
           KV_TYPE: etcd
-          KV_IP: kvstore-0-etcd.ceph.autoip.dcos.thisdcos.directory
-          KV_PORT: 2379
+          KV_IP: {{CEPH_KV_IP}}
+          KV_PORT: {{CEPH_KV_PORT}}
           CEPH_PUBLIC_NETWORK: {{CEPH_PUBLIC_NETWORK}}
           CEPH_CLUSTER_NETWORK: {{CEPH_CLUSTER_NETWORK}}
         ports:
@@ -120,17 +122,18 @@ pods:
   storage:
     uris:
       - {{BOOTSTRAP_URI}}
-    count: 2
+    count: {{CEPH_OSD_NODE_COUNT}}
+    placement: {{CEPH_OSD_NODE_PLACEMENT}}
     container:
       image-name: {{CEPH_IMAGE}}
     tasks:
       osd:
         goal: RUNNING
-        cpus: 0.5
-        memory: 1024
+        cpus: {{CEPH_OSD_NODE_CPUS}}
+        memory: {{CEPH_OSD_NODE_MEM}}
         cmd: >
                cd ${MESOS_SANDBOX} ;
-               ./bootstrap -print-env=true -resolve=true -resolve-hosts=kvstore-0-etcd.${FRAMEWORK_HOST},monitor-0-mon.${FRAMEWORK_HOST},${TASK_NAME}.${FRAMEWORK_HOST} ;
+               ./bootstrap -print-env=true -resolve=true -resolve-hosts=${KV_IP},monitor-0-mon.${FRAMEWORK_HOST},${TASK_NAME}.${FRAMEWORK_HOST} ;
                export HOSTNAME=${TASK_NAME}.${FRAMEWORK_HOST} ;
                cd / && chmod a+x /variables_entrypoint.sh && chmod a+x /osd_directory_prepare.sh && ./osd_directory_prepare.sh && ./entrypoint.sh osd_directory
         configs:
@@ -146,7 +149,138 @@ pods:
           type: ROOT
         env:
           KV_TYPE: etcd
-          KV_IP: kvstore-0-etcd.ceph.autoip.dcos.thisdcos.directory
-          KV_PORT: 2379
+          KV_IP: {{CEPH_KV_IP}}
+          KV_PORT: {{CEPH_KV_PORT}}
           CEPH_PUBLIC_NETWORK: {{CEPH_PUBLIC_NETWORK}}
           CEPH_CLUSTER_NETWORK: {{CEPH_CLUSTER_NETWORK}}
+  metadata:
+    uris:
+      - {{BOOTSTRAP_URI}}
+    count: {{CEPH_MDS_NODE_COUNT}}
+    placement: {{CEPH_MDS_NODE_PLACEMENT}}
+    container:
+      image-name: {{CEPH_IMAGE}}
+    tasks:
+      mds:
+        goal: RUNNING
+        cpus: {{CEPH_MDS_NODE_CPUS}}
+        memory: {{CEPH_MDS_NODE_MEM}}
+        cmd: >
+               cd ${MESOS_SANDBOX} ;
+               ./bootstrap -print-env=true -resolve=true -resolve-hosts=${KV_IP},monitor-0-mon.${FRAMEWORK_HOST},${TASK_NAME}.${FRAMEWORK_HOST} ;
+               export MDS_NAME=${TASK_NAME} ;
+               cd / && chmod a+x /variables_entrypoint.sh && /entrypoint.sh mds
+        configs:
+          variables:
+            template: {{CONFIG_TEMPLATE_PATH}}/variables_entrypoint.sh.mustache
+            dest: /variables_entrypoint.sh
+        env:
+          KV_TYPE: etcd
+          KV_IP: {{CEPH_KV_IP}}
+          KV_PORT: {{CEPH_KV_PORT}}
+          CEPH_PUBLIC_NETWORK: {{CEPH_PUBLIC_NETWORK}}
+          CEPH_CLUSTER_NETWORK: {{CEPH_CLUSTER_NETWORK}}
+          CEPHFS_CREATE: 1
+  gateway:
+    uris:
+      - {{BOOTSTRAP_URI}}
+    count: {{CEPH_RGW_NODE_COUNT}}
+    placement: {{CEPH_RGW_NODE_PLACEMENT}}
+    container:
+      image-name: {{CEPH_IMAGE}}
+    tasks:
+      rgw:
+        goal: RUNNING
+        cpus: {{CEPH_RGW_NODE_CPUS}}
+        memory: {{CEPH_RGW_NODE_MEM}}
+        cmd: >
+               cd ${MESOS_SANDBOX} ;
+               ./bootstrap -print-env=true -resolve=true -resolve-hosts=${KV_IP},monitor-0-mon.${FRAMEWORK_HOST},${TASK_NAME}.${FRAMEWORK_HOST} ;
+               export RGW_NAME=${TASK_NAME} ;
+               cd / && chmod a+x /variables_entrypoint.sh && /entrypoint.sh rgw
+        configs:
+          variables:
+            template: {{CONFIG_TEMPLATE_PATH}}/variables_entrypoint.sh.mustache
+            dest: /variables_entrypoint.sh
+        env:
+          KV_TYPE: etcd
+          KV_IP: {{CEPH_KV_IP}}
+          KV_PORT: {{CEPH_KV_PORT}}
+          CEPH_PUBLIC_NETWORK: {{CEPH_PUBLIC_NETWORK}}
+          CEPH_CLUSTER_NETWORK: {{CEPH_CLUSTER_NETWORK}}
+        ports:
+          civetweb:
+            port: 0
+            env-key: RGW_CIVETWEB_PORT
+            advertise: true
+            vip:
+              port: 80
+  restapi:
+    uris:
+      - {{BOOTSTRAP_URI}}
+    count: {{CEPH_RGW_NODE_COUNT}}
+    placement: {{CEPH_RGW_NODE_PLACEMENT}}
+    container:
+      image-name: {{CEPH_IMAGE}}
+    tasks:
+      rest:
+        goal: RUNNING
+        cpus: {{CEPH_REST_NODE_CPUS}}
+        memory: {{CEPH_REST_NODE_MEM}}
+        cmd: >
+               cd ${MESOS_SANDBOX} ;
+               ./bootstrap -print-env=true -resolve=true -resolve-hosts=${KV_IP},monitor-0-mon.${FRAMEWORK_HOST},${TASK_NAME}.${FRAMEWORK_HOST} ;
+               export RESTAPI_IP=${MESOS_CONTAINER_IP} && RESTAPI_LOG_FILE=${MESOS_SANDBOX}/ceph-restapi.log ;
+               cd / && chmod a+x /variables_entrypoint.sh && /entrypoint.sh restapi
+        configs:
+          variables:
+            template: {{CONFIG_TEMPLATE_PATH}}/variables_entrypoint.sh.mustache
+            dest: /variables_entrypoint.sh
+        env:
+          KV_TYPE: etcd
+          KV_IP: {{CEPH_KV_IP}}
+          KV_PORT: {{CEPH_KV_PORT}}
+          CEPH_PUBLIC_NETWORK: {{CEPH_PUBLIC_NETWORK}}
+          CEPH_CLUSTER_NETWORK: {{CEPH_CLUSTER_NETWORK}}
+        ports:
+          restapi:
+            port: 0
+            env-key: RESTAPI_PORT
+            advertise: true
+            vip:
+              port: 80
+
+plans:
+  deploy:
+    strategy: serial
+    phases:
+      kvstore:
+        strategy: serial
+        pod: kvstore
+      ceph-config:
+        strategy: serial
+        pod: ceph-config
+      ceph-mon:
+        strategy: serial
+        pod: monitor
+      ceph-osd:
+        strategy: serial
+        pod: storage
+      ceph-mgr:
+        strategy: serial
+        pod: manager
+{{#CEPH_MDS_ENABLED}}
+      ceph-mds:
+        strategy: serial
+        pod: metadata
+{{/CEPH_MDS_ENABLED}}
+{{#CEPH_RGW_ENABLED}}
+      ceph-rgw:
+        strategy: serial
+        pod: gateway
+{{/CEPH_RGW_ENABLED}}
+{{#CEPH_RESTAPI_ENABLED}}
+      ceph-restapi:
+        strategy: serial
+        pod: restapi
+{{/CEPH_RESTAPI_ENABLED}}

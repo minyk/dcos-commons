@@ -48,6 +48,16 @@
     "LIBMESOS_URI": "{{resource.assets.uris.libmesos-bundle-tar-gz}}",
 
     "CEPH_IMAGE": "{{service.ceph_image}}",
+    "CEPH_DEV_ENABLED": "{{service.dev_enabled}}",
+    {{#service.dev_enabled}}
+    "CEPH_KV_IP": "kvstore-0-etcd.ceph.autoip.dcos.thisdcos.directory",
+    "CEPH_KV_PORT": "2379",
+    {{/service.dev_enabled}}
+    {{^service.dev_enabled}}
+    "CEPH_KV_IP": "{{service.kvstore_ip}}",
+    "CEPH_KV_PORT": "{{service.kvstore_port}}",
+    {{/service.dev_enabled}}
+
     "CEPH_PUBLIC_NETWORK": "{{ceph_global.public_network}}",
     "CEPH_CLUSTER_NETWORK": "{{ceph_global.cluster_network}}",
 
@@ -61,6 +71,7 @@
     "CEPH_OSD_NODE_CPUS": "{{ceph_osd.cpus}}",
     "CEPH_OSD_NODE_MEM": "{{ceph_osd.mem}}",
 
+    "CEPH_MDS_ENABLED": "{{ceph_mds.enabled}}",
     "CEPH_MDS_NODE_COUNT": "{{ceph_mds.count}}",
     "CEPH_MDS_NODE_PLACEMENT": "{{ceph_mds.placement_constraint}}",
     "CEPH_MDS_NODE_CPUS": "{{ceph_mds.cpus}}",
@@ -71,10 +82,19 @@
     "CEPH_MGR_NODE_CPUS": "{{ceph_mgr.cpus}}",
     "CEPH_MGR_NODE_MEM": "{{ceph_mgr.mem}}",
 
+    "CEPH_RGW_ENABLED": "{{ceph_rgw.enabled}}",
     "CEPH_RGW_NODE_COUNT": "{{ceph_rgw.count}}",
     "CEPH_RGW_NODE_PLACEMENT": "{{ceph_rgw.placement_constraint}}",
     "CEPH_RGW_NODE_CPUS": "{{ceph_rgw.cpus}}",
-    "CEPH_RGW_NODE_MEM": "{{ceph_rgw.mem}}"
+    "CEPH_RGW_NODE_MEM": "{{ceph_rgw.mem}}",
+    "CEPH_RGW_ZONEGROUP": "{{ceph_rgw.zonegroup}}",
+    "CEPH_RGW_ZONE": "{{ceph_rgw.zone}}",
+
+    "CEPH_RESTAPI_ENABLED": "{{ceph_restapi.enabled}}",
+    "CEPH_RESTAPI_NODE_COUNT": "{{ceph_restapi.count}}",
+    "CEPH_RESTAPI_NODE_PLACEMENT": "{{ceph_restapi.placement_constraint}}",
+    "CEPH_RESTAPI_NODE_CPUS": "{{ceph_restapi.cpus}}",
+    "CEPH_RESTAPI_NODE_MEM": "{{ceph_restapi.mem}}"
 
   },
   "uris": [
