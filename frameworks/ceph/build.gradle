@@ -23,6 +23,7 @@ ext {
 dependencies {
     compile project(":scheduler")
     compile project(":executor")
+    compile 'org.mousio:etcd4j:2.13.0'
     testCompile project(":testing")
 }
 
