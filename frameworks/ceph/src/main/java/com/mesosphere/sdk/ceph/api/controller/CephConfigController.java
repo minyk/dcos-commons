@@ -1,6 +1,7 @@
-package com.mesosphere.sdk.ceph.api;
+package com.mesosphere.sdk.ceph.api.controller;
 
 import com.mesosphere.sdk.api.ResponseUtils;
+import com.mesosphere.sdk.ceph.api.util.CephEtcdClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,11 +14,11 @@ import javax.ws.rs.core.Response;
  * REST API for ceph.conf.
  */
 @Path("/v1/ceph/config")
-public class CephConfig {
-    private final Logger log = LoggerFactory.getLogger(CephConfig.class);
+public class CephConfigController {
+    private final Logger log = LoggerFactory.getLogger(CephConfigController.class);
     private CephEtcdClient cephetcdclient;
 
-    public CephConfig(CephEtcdClient client) {
+    public CephConfigController(CephEtcdClient client) {
         this.cephetcdclient = client;
     }
 

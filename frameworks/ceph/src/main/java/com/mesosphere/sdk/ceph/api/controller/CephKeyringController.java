@@ -1,6 +1,7 @@
-package com.mesosphere.sdk.ceph.api;
+package com.mesosphere.sdk.ceph.api.controller;
 
 import com.mesosphere.sdk.api.ResponseUtils;
+import com.mesosphere.sdk.ceph.api.util.CephEtcdClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,11 +15,11 @@ import javax.ws.rs.core.Response;
  */
 
 @Path("/v1/ceph/keyring")
-public class CephKeyring {
-    private final Logger log = LoggerFactory.getLogger(CephKeyring.class);
+public class CephKeyringController {
+    private final Logger log = LoggerFactory.getLogger(CephKeyringController.class);
     private CephEtcdClient cephetcdclient;
 
-    public CephKeyring(CephEtcdClient client) {
+    public CephKeyringController(CephEtcdClient client) {
         this.cephetcdclient = client;
     }
 

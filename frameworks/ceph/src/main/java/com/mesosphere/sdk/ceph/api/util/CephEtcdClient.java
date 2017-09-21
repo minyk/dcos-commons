@@ -1,4 +1,4 @@
-package com.mesosphere.sdk.ceph.api;
+package com.mesosphere.sdk.ceph.api.util;
 
 import mousio.etcd4j.EtcdClient;
 import mousio.etcd4j.promises.EtcdResponsePromise;

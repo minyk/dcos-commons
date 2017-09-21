@@ -1,9 +1,9 @@
 package com.mesosphere.sdk.ceph.scheduler;
 
 import com.mesosphere.sdk.api.types.EndpointProducer;
-import com.mesosphere.sdk.ceph.api.CephConfig;
-import com.mesosphere.sdk.ceph.api.CephKeyring;
-import com.mesosphere.sdk.ceph.api.CephEtcdClient;
+import com.mesosphere.sdk.ceph.api.controller.CephConfigController;
+import com.mesosphere.sdk.ceph.api.controller.CephKeyringController;
+import com.mesosphere.sdk.ceph.api.util.CephEtcdClient;
 import com.mesosphere.sdk.curator.CuratorUtils;
 import com.mesosphere.sdk.scheduler.DefaultScheduler;
 import com.mesosphere.sdk.scheduler.SchedulerFlags;
@@ -68,8 +68,8 @@ public class Main {
     private static Collection<Object> getResources(String etcdEndpoints) {
         CephEtcdClient client = new CephEtcdClient(etcdEndpoints);
         final Collection<Object> apiResources = new ArrayList<>();
-        apiResources.add(new CephKeyring(client));
-        apiResources.add(new CephConfig(client));
+        apiResources.add(new CephKeyringController(client));
+        apiResources.add(new CephConfigController(client));
         return apiResources;
     }
 }
