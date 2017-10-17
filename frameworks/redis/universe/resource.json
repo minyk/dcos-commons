@@ -5,7 +5,9 @@
       "libmesos-bundle-tar-gz": "{{libmesos-bundle-url}}",
       "scheduler-zip": "{{artifact-dir}}/redis-scheduler.zip",
       "bootstrap-zip": "{{artifact-dir}}/bootstrap.zip",
-      "executor-zip": "{{artifact-dir}}/executor.zip"
+      "executor-zip": "{{artifact-dir}}/executor.zip",
+      "bootstrap-local": "http://api.redis.marathon.l4lb.thisdcos.directory/v1/files/bootstrap.zip",
+      "executor-local": "http://api.redis.marathon.l4lb.thisdcos.directory/v1/files/executor.zip"
     },
     "container": {
       "docker": {

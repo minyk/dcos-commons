@@ -26,7 +26,7 @@
     "FRAMEWORK_USER": "{{service.user}}",
     "FRAMEWORK_PRINCIPAL": "{{service.service_account}}",
     "FRAMEWORK_LOG_LEVEL": "{{service.log_level}}",
-    "BOOTSTRAP_URI": "{{resource.assets.uris.bootstrap-zip}}",
+    "BOOTSTRAP_URI": "{{resource.assets.uris.bootstrap-local}}",
 
     {{#service.virtual_network_enabled}}
     "ENABLE_VIRTUAL_NETWORK": "yes",
@@ -38,7 +38,7 @@
 
     "CONFIG_TEMPLATE_PATH": "redis-scheduler",
     "JAVA_URI": "{{resource.assets.uris.jre-tar-gz}}",
-    "EXECUTOR_URI": "{{resource.assets.uris.executor-zip}}",
+    "EXECUTOR_URI": "{{resource.assets.uris.executor-local}}",
     "REDIS_IMAGE": "{{resource.assets.container.docker.hub-redis-3-alpine}}",
     "CORVUS_IMAGE": "{{resource.assets.container.docker.hub-corvus-alpine}}",
     {{#service.service_account_secret}}
@@ -78,7 +78,9 @@
   "uris": [
     "{{resource.assets.uris.jre-tar-gz}}",
     "{{resource.assets.uris.scheduler-zip}}",
-    "{{resource.assets.uris.libmesos-bundle-tar-gz}}"
+    "{{resource.assets.uris.libmesos-bundle-tar-gz}}",
+    "{{resource.assets.uris.bootstrap-zip}}",
+    "{{resource.assets.uris.executor-zip}}"
   ],
   "upgradeStrategy":{
     "minimumHealthCapacity": 0,

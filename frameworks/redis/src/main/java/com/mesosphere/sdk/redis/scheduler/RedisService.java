@@ -1,5 +1,6 @@
 package com.mesosphere.sdk.redis.scheduler;
 
+import com.mesosphere.sdk.redis.api.FileResource;
 import com.mesosphere.sdk.redis.api.Instance;
 import com.mesosphere.sdk.scheduler.DefaultScheduler;
 import com.mesosphere.sdk.scheduler.SchedulerFlags;
@@ -17,7 +18,7 @@ import java.util.Collection;
  */
 public class RedisService extends DefaultService {
 
-    public RedisService(File pathToYamlSpecification, SchedulerFlags flags) throws  Exception {
+    public RedisService(File pathToYamlSpecification) throws  Exception {
         super(createSchedulerBuilder(pathToYamlSpecification));
     }
 
@@ -36,6 +37,7 @@ public class RedisService extends DefaultService {
     private static Collection<Object> getResources() {
         final Collection<Object> apiResources = new ArrayList<>();
         apiResources.add(new Instance());
+        apiResources.add(new FileResource());
         return apiResources;
     }
 }
