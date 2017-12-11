@@ -145,8 +145,8 @@ pods:
             dest: /osd_directory_prepare.sh
         volume:
           path: cephdata
-          size: 10000
-          type: ROOT
+          size: {{CEPH_OSD_DISK_SIZE}}
+          type: {{CEPH_OSD_DISK_TYPE}}
         env:
           KV_TYPE: etcd
           KV_IP: {{CEPH_KV_IP}}
@@ -218,15 +218,15 @@ pods:
   restapi:
     uris:
       - {{BOOTSTRAP_URI}}
-    count: {{CEPH_RGW_NODE_COUNT}}
-    placement: {{CEPH_RGW_NODE_PLACEMENT}}
+    count: {{CEPH_RESTAPI_NODE_COUNT}}
+    placement: {{CEPH_RESTAPI_NODE_PLACEMENT}}
     container:
       image-name: {{CEPH_IMAGE}}
     tasks:
       rest:
         goal: RUNNING
-        cpus: {{CEPH_REST_NODE_CPUS}}
-        memory: {{CEPH_REST_NODE_MEM}}
+        cpus: {{CEPH_RESTAPI_NODE_CPUS}}
+        memory: {{CEPH_RESTAPI_NODE_MEM}}
         cmd: >
                cd ${MESOS_SANDBOX} ;
                ./bootstrap -print-env=true -resolve=true -resolve-hosts=${KV_IP},monitor-0-mon.${FRAMEWORK_HOST},${TASK_NAME}.${FRAMEWORK_HOST} ;

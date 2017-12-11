@@ -1,35 +1,22 @@
 package com.mesosphere.sdk.ceph.scheduler;
 
+import com.mesosphere.sdk.testing.ServiceTestRunner;
 import org.junit.Test;
-
-import com.mesosphere.sdk.testing.ServiceTestBuilder;
 
 public class ServiceTest {
 
     @Test
     public void testSpec() throws Exception {
-        new ServiceTestBuilder()
-                .setOptions(
-                        "ceph_mon.count", "2",
-                        "ceph_mon.cpus", "1",
-                        "ceph_mon.mem", "32",
 
-                        "ceph_osd.count", "2",
-                        "ceph_osd.cpus", "1",
-                        "ceph_osd.mem", "32",
+    new ServiceTestRunner()
+        .setSchedulerEnv("CEPH_IMAGE", "ceph/daemon:tag-build-master-luminous-centos-7")
+        .setSchedulerEnv("VIRTUAL_NETWORK_NAME", "dcos")
+        .setPodEnv("monitor", "CEPH_MON_NODE_COUNT", "2")
+        .setPodEnv("manager", "CEPH_MGR_NODE_COUNT", "1")
+        .setPodEnv("metadata", "CEPH_MDS_NODE_COUNT", "1")
+        .setPodEnv("gateway", "CEPH_RGW_NODE_COUNT", "1")
+        .setPodEnv("restapi", "CEPH_RGW_NODE_COUNT", "1")
 
-                        "ceph_mds.count", "2",
-                        "ceph_mds.cpus", "1",
-                        "ceph_mds.mem", "32",
-
-                        "ceph_mgr.count", "2",
-                        "ceph_mgr.cpus", "1",
-                        "ceph_mgr.mem", "32",
-
-                        "ceph_rgw.count", "2",
-                        "ceph_rgw.cpus", "1",
-                        "ceph_rgw.mem", "32"
-                )
-                .render();
+        .run();
     }
 }

@@ -30,6 +30,7 @@
     "FRAMEWORK_USER": "{{service.user}}",
     "FRAMEWORK_PRINCIPAL": "{{service.service_account}}",
     "FRAMEWORK_LOG_LEVEL": "{{service.log_level}}",
+    "MESOS_API_VERSION": "{{service.mesos_api_version}}",
 
     {{#service.virtual_network_enabled}}
     "ENABLE_VIRTUAL_NETWORK": "yes",
@@ -42,21 +43,22 @@
     "BOOTSTRAP_URI": "{{resource.assets.uris.bootstrap-zip}}",
     {{#service.service_account_secret}}
     "DCOS_SERVICE_ACCOUNT_CREDENTIAL": { "secret": "serviceCredential" },
-    "MESOS_MODULES": "{\"libraries\": [{\"file\": \"libdcos_security.so\", \"modules\": [{\"name\": \"com_mesosphere_dcos_ClassicRPCAuthenticatee\"}]}]}",
+    "MESOS_MODULES": "{\"libraries\":[{\"file\":\"libmesos-bundle\/lib\/mesos\/libdcos_security.so\",\"modules\":[{\"name\": \"com_mesosphere_dcos_ClassicRPCAuthenticatee\"},{\"name\":\"com_mesosphere_dcos_http_Authenticatee\",\"parameters\":[{\"key\":\"jwt_exp_timeout\",\"value\":\"5mins\"},{\"key\":\"preemptive_refresh_duration\",\"value\":\"30mins\"}]}]}]}",
     "MESOS_AUTHENTICATEE": "com_mesosphere_dcos_ClassicRPCAuthenticatee",
+    "MESOS_HTTP_AUTHENTICATEE": "com_mesosphere_dcos_http_Authenticatee",
     {{/service.service_account_secret}}
     "LIBMESOS_URI": "{{resource.assets.uris.libmesos-bundle-tar-gz}}",
 
-    "CEPH_IMAGE": "{{service.ceph_image}}",
-    "CEPH_DEV_ENABLED": "{{service.dev_enabled}}",
-    {{#service.dev_enabled}}
+    "CEPH_IMAGE": "{{ceph_global.ceph_image}}",
+    "CEPH_DEV_ENABLED": "{{ceph_global.dev_enabled}}",
+    {{#ceph_global.dev_enabled}}
     "CEPH_KV_IP": "kvstore-0-etcd.ceph.autoip.dcos.thisdcos.directory",
     "CEPH_KV_PORT": "2379",
-    {{/service.dev_enabled}}
-    {{^service.dev_enabled}}
-    "CEPH_KV_IP": "{{service.kvstore_ip}}",
-    "CEPH_KV_PORT": "{{service.kvstore_port}}",
-    {{/service.dev_enabled}}
+    {{/ceph_global.dev_enabled}}
+    {{^ceph_global.dev_enabled}}
+    "CEPH_KV_IP": "{{ceph_global.kvstore_ip}}",
+    "CEPH_KV_PORT": "{{ceph_global.kvstore_port}}",
+    {{/ceph_global.dev_enabled}}
 
     "CEPH_PUBLIC_NETWORK": "{{ceph_global.public_network}}",
     "CEPH_CLUSTER_NETWORK": "{{ceph_global.cluster_network}}",
@@ -70,6 +72,8 @@
     "CEPH_OSD_NODE_PLACEMENT": "{{ceph_osd.placement_constraint}}",
     "CEPH_OSD_NODE_CPUS": "{{ceph_osd.cpus}}",
     "CEPH_OSD_NODE_MEM": "{{ceph_osd.mem}}",
+    "CEPH_OSD_DISK_SIZE": "{{ceph_osd.disk}}",
+    "CEPH_OSD_DISK_TYPE": "{{ceph_osd.disk_type}}",
 
     "CEPH_MDS_ENABLED": "{{ceph_mds.enabled}}",
     "CEPH_MDS_NODE_COUNT": "{{ceph_mds.count}}",

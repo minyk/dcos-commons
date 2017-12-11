@@ -22,6 +22,12 @@
             "type": "string",
             "default": "root"
           },
+          "mesos_api_version": {
+            "description": "Configures the Mesos API version to use. Possible values: V0 (non-HTTP), V1 (HTTP)",
+            "type": "string",
+            "enum": ["V0", "V1"],
+            "default": "V1"
+          },
           "service_account": {
             "description": "The service account for DC/OS service authentication. This is typically left empty to use the default unless service authentication is needed. The value given here is passed as the principal of Mesos framework.",
             "type": "string",
@@ -53,7 +59,18 @@
             "type": "string",
             "enum": ["OFF", "FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE", "ALL"],
             "default": "INFO"
-          },
+          }
+        },
+        "required":[
+          "name",
+          "sleep",
+          "user"
+        ]
+      },
+      "ceph_global": {
+        "description": "Ceph global configuration properties",
+        "type": "object",
+        "properties": {
           "ceph_image": {
             "title": "Ceph Version",
             "description": "Ceph Image to run. Currently 'tag-build-master-luminous-centos-7' tag is supported.",
@@ -77,18 +94,7 @@
             "description": "Dev mode for Ceph Scheduler.",
             "type": "boolean",
             "default": true
-          }
-        },
-        "required":[
-          "name",
-          "sleep",
-          "user"
-        ]
-      },
-      "ceph_global": {
-        "description": "Ceph global configuration properties",
-        "type": "object",
-        "properties": {
+          },
           "public_network": {
             "title": "Ceph Public Network",
             "description": "Network for public access. {IP}/{NETMASK}.",
@@ -189,6 +195,21 @@
             "description": "Ceph OSD daemon mem requirements (in MB)",
             "type": "integer",
             "default":1024
+          },
+          "disk": {
+            "title": "Disk size (MB)",
+            "description": "Template pod persistent disk requirements (in MB)",
+            "type": "integer",
+            "default":1000
+          },
+          "disk_type": {
+            "title": "Disk type [ROOT, MOUNT]",
+            "description": "Mount volumes require preconfiguration in DC/OS",
+            "enum": [
+              "ROOT",
+              "MOUNT"
+            ],
+            "default": "ROOT"
           }
         },
         "required":[
