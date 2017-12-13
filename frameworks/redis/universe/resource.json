@@ -6,13 +6,14 @@
       "scheduler-zip": "{{artifact-dir}}/redis-scheduler.zip",
       "bootstrap-zip": "{{artifact-dir}}/bootstrap.zip",
       "executor-zip": "{{artifact-dir}}/executor.zip",
+      "stadis-bin": "{{artifact-dir}}/stadis-linux-amd64.zip",
       "bootstrap-local": "http://api.redis.marathon.l4lb.thisdcos.directory/v1/files/bootstrap.zip",
       "executor-local": "http://api.redis.marathon.l4lb.thisdcos.directory/v1/files/executor.zip"
     },
     "container": {
       "docker": {
         "hub-redis-4-alpine": "library/redis:4.0.1-alpine",
-        "hub-redis-3-alpine": "library/redis:3.2.10-alpine",
+        "hub-redis-3-alpine": "library/redis:3.2.11-alpine",
         "hub-corvus-alpine": "minyk/corvus:0.2.6-alpine"
       }
     }

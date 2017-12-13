@@ -9,4 +9,5 @@ $FRAMEWORK_DIR/../../tools/build_framework.sh \
     $FRAMEWORK_DIR \
     --artifact "$BUILD_DIR/executor.zip" \
     --artifact "$BUILD_DIR/$(basename $FRAMEWORK_DIR)-scheduler.zip" \
+    --artifact "$FRAMEWORK_DIR/docker/stadis-linux-amd64.zip" \
     $@

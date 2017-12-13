@@ -36,6 +36,21 @@ public class FileResource {
                 return Response.ok(file, MediaType.APPLICATION_OCTET_STREAM)
                         .header("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"") //optional
                         .build();
+            case "jre-8u131-linux-x64-jce-unlimited.tar.gz":
+                file = new File(MESOS_SANDBOX + "/jre-8u131-linux-x64-jce-unlimited.tar.gz");
+                return Response.ok(file, MediaType.APPLICATION_OCTET_STREAM)
+                        .header("Content-Disposition", "attachement; filename=\"" + file.getName() + "\"")
+                        .build();
+            case "libmesos-bundle-1.10-1.4-63e0814.tar.gz":
+                file = new File(MESOS_SANDBOX + "/libmesos-bundle-1.10-1.4-63e0814.tar.gz");
+                return Response.ok(file, MediaType.APPLICATION_OCTET_STREAM)
+                        .header("Content-Disposition", "attachement; filename=\"" + file.getName() + "\"")
+                        .build();
+            case "stadis-linux-amd64.zip":
+                file = new File(MESOS_SANDBOX + "/stadis-linux-amd64.zip");
+                return Response.ok(file, MediaType.APPLICATION_OCTET_STREAM)
+                        .header("Content-Disposition", "attachement; filename=\"" + file.getName() + "\"")
+                        .build();
             default:
                 logger.warn("No such file: {}", filename);
                 return Response.status(Response.Status.NOT_FOUND).build();

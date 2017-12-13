@@ -6,6 +6,7 @@ pods:
   master:
     uris:
       - {{BOOTSTRAP_URI}}
+      - {{STADIS_URI}}
     count: 1
     placement: {{NODE_PLACEMENT}}
     container:
@@ -41,9 +42,15 @@ pods:
           REDIS_CONF_TCP_KEEPALIVE: {{REDIS_CONF_TCP_KEEPALIVE}}
           REDIS_CONF_LOGLEVEL: {{REDIS_CONF_LOGLEVEL}}
           REDIS_CONF_DATABASES: {{REDIS_CONF_DATABASES}}
+      statsd:
+        goal: RUNNING
+        cmd: "cd ${MESOS_SANDBOX} && ./bootstrap -print-env=true && ./stadis-linux-amd64 --redis-host=${TASK_NAME}.${FRAMEWORK_HOST}:6379 --statsd-host=${STATSD_UDP_HOST}:${STATSD_UDP_PORT} --prefix ${MESOS_TASK_ID}.${FRAMEWORK_NAME}"
+        cpus: 0.1
+        memory: 32
   slaves:
     uris:
       - {{BOOTSTRAP_URI}}
+      - {{STADIS_URI}}
     count: {{NODE_COUNT}}
     placement: {{NODE_PLACEMENT}}
     container:
@@ -77,6 +84,11 @@ pods:
           REDIS_CONF_TCP_KEEPALIVE: {{REDIS_CONF_TCP_KEEPALIVE}}
           REDIS_CONF_LOGLEVEL: {{REDIS_CONF_LOGLEVEL}}
           REDIS_CONF_DATABASES: {{REDIS_CONF_DATABASES}}
+      statsd:
+        goal: RUNNING
+        cmd: "cd ${MESOS_SANDBOX} && ./bootstrap -print-env=true && ./stadis-linux-amd64 --redis-host=${TASK_NAME}.${FRAMEWORK_HOST}:6379 --statsd-host=${STATSD_UDP_HOST}:${STATSD_UDP_PORT} --prefix ${MESOS_TASK_ID}.${FRAMEWORK_NAME}"
+        cpus: 0.1
+        memory: 32
   sentinels:
     uris:
       - {{BOOTSTRAP_URI}}

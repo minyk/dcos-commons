@@ -1,0 +1,119 @@
+{
+  "id": "{{service.name}}",
+  "cpus": 0.5,
+  "mem": 1024,
+  "instances": 1,
+  "cmd": "export LD_LIBRARY_PATH=$MESOS_SANDBOX/libmesos-bundle/lib:$LD_LIBRARY_PATH; export MESOS_NATIVE_JAVA_LIBRARY=$(ls $MESOS_SANDBOX/libmesos-bundle/lib/libmesos-*.so); export JAVA_HOME=$(ls -d $MESOS_SANDBOX/jre*/); export JAVA_HOME=${JAVA_HOME%/}; export PATH=$(ls -d $JAVA_HOME/bin):$PATH &&  export JAVA_OPTS=\"-Xms256M -Xmx512M -XX:-HeapDumpOnOutOfMemoryError\" &&  ./redis-scheduler/bin/redis ./redis-scheduler/svc.yml",
+  "labels": {
+    "DCOS_COMMONS_API_VERSION": "v1",
+    "DCOS_COMMONS_UNINSTALL": "true",
+    "DCOS_PACKAGE_FRAMEWORK_NAME": "{{service.name}}",
+    "MARATHON_SINGLE_INSTANCE_APP": "true",
+    "DCOS_SERVICE_NAME": "{{service.name}}",
+    "DCOS_SERVICE_PORT_INDEX": "0",
+    "DCOS_SERVICE_SCHEME": "http"
+  },
+{{#service.service_account_secret}}
+"secrets": {
+"serviceCredential": {
+"source": "{{service.service_account_secret}}"
+}
+},
+{{/service.service_account_secret}}
+"env": {
+"PACKAGE_NAME": "{{package-name}}",
+"PACKAGE_VERSION": "{{package-version}}",
+"PACKAGE_BUILD_TIME_EPOCH_MS": "{{package-build-time-epoch-ms}}",
+"PACKAGE_BUILD_TIME_STR": "{{package-build-time-str}}",
+"FRAMEWORK_NAME": "{{service.name}}",
+"SLEEP_DURATION": "{{service.sleep}}",
+"FRAMEWORK_USER": "{{service.user}}",
+"FRAMEWORK_PRINCIPAL": "{{service.service_account}}",
+"FRAMEWORK_LOG_LEVEL": "{{service.log_level}}",
+"BOOTSTRAP_URI": "{{resource.assets.uris.bootstrap-zip}}",
+"MESOS_API_VERSION": "V1",
+
+{{#service.virtual_network_enabled}}
+"ENABLE_VIRTUAL_NETWORK": "yes",
+"VIRTUAL_NETWORK_NAME": "{{service.virtual_network_name}}",
+{{/service.virtual_network_enabled}}
+"NODE_CPUS": "{{node.cpus}}",
+"NODE_MEM": "{{node.mem}}",
+
+"CONFIG_TEMPLATE_PATH": "redis-scheduler",
+"JAVA_URI": "{{resource.assets.uris.jre-tar-gz}}",
+"EXECUTOR_URI": "{{resource.assets.uris.executor-zip}}",
+"REDIS_IMAGE": "{{resource.assets.container.docker.hub-redis-3-alpine}}",
+"CORVUS_IMAGE": "{{resource.assets.container.docker.hub-corvus-alpine}}",
+{{#service.service_account_secret}}
+"DCOS_SERVICE_ACCOUNT_CREDENTIAL": { "secret": "serviceCredential" },
+"MESOS_MODULES": "{\"libraries\": [{\"file\": \"libdcos_security.so\", \"modules\": [{\"name\": \"com_mesosphere_dcos_ClassicRPCAuthenticatee\"}]}]}",
+"MESOS_AUTHENTICATEE": "com_mesosphere_dcos_ClassicRPCAuthenticatee",
+{{/service.service_account_secret}}
+"LIBMESOS_URI": "{{resource.assets.uris.libmesos-bundle-tar-gz}}",
+
+"NODE_COUNT": "{{node.count}}",
+"NODE_PLACEMENT": "{{node.placement_constraint}}",
+"REDIS_CONF_TCP_BACKLOG": "{{redis.tcp-backlog}}",
+"REDIS_CONF_TIMEOUT": "{{redis.timeout}}",
+"REDIS_CONF_TCP_KEEPALIVE": "{{redis.tcp-keepalive}}",
+"REDIS_CONF_LOGLEVEL": "{{redis.loglevel}}",
+"REDIS_CONF_DATABASES": "{{redis.databases}}",
+
+"REDIS_SENTINEL_COUNT": "{{redis-sentinel.count}}",
+"REDIS_SENTINEL_PLACEMENT": "{{redis-sentinel.placement_constraint}}",
+"REDIS_SENTINEL_CONF_QUORUM": "{{redis-sentinel.quorum}}",
+"REDIS_SENTINEL_CONF_DOWN_AFTER": "{{redis-sentinel.down-after}}",
+"REDIS_SENTINEL_CONF_FAILOVER_TIMEOUT": "{{redis-sentinel.failover-timeout}}",
+"REDIS_SENTINEL_CONF_PARALLEL_SYNCS": "{{redis-sentinel.parallel-syncs}}",
+
+"CORVUS_COUNT": "{{corvus.count}}",
+"CORVUS_PLACEMENT": "{{corvus.placement_constraint}}",
+"CORVUS_CPUS": "{{corvus.cpus}}",
+"CORVUS_MEMORY": "{{corvus.mem}}",
+"CORVUS_CONF_LOGLEVEL": "{{corvus.loglevel}}",
+"CORVUS_CONF_CLIENT_TIMEOUT": "{{corvus.client-timeout}}",
+"CORVUS_CONF_SERVER_TIMEOUT": "{{corvus.server-timeout}}",
+"CORVUS_CONF_BUFFERSIZE": "{{corvus.bufsize}}",
+"CORVUS_CONF_READ_STRATEGY": "{{corvus.read-strategy}}",
+"CORVUS_CONF_STATSD_METRICS_ENABLED": "{{corvus.statd-metrics-enabled}}"
+
+},
+"uris": [
+"{{resource.assets.uris.jre-tar-gz}}",
+"{{resource.assets.uris.scheduler-zip}}",
+"{{resource.assets.uris.libmesos-bundle-tar-gz}}"
+],
+"upgradeStrategy":{
+"minimumHealthCapacity": 0,
+"maximumOverCapacity": 0
+},
+"healthChecks": [
+{
+"protocol": "HTTP",
+"path": "/v1/plans/deploy",
+"gracePeriodSeconds": 900,
+"intervalSeconds": 30,
+"portIndex": 0,
+"timeoutSeconds": 30,
+"maxConsecutiveFailures": 0
+},
+{
+"protocol": "HTTP",
+"path": "/v1/plans/recovery",
+"gracePeriodSeconds": 900,
+"intervalSeconds": 30,
+"portIndex": 0,
+"timeoutSeconds": 30,
+"maxConsecutiveFailures": 0
+}
+],
+"portDefinitions": [
+{
+"port": 0,
+"protocol": "tcp",
+"name": "api",
+"labels": { "VIP_0": "/api.{{service.name}}:80" }
+}
+]
+}

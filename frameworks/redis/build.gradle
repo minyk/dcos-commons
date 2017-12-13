@@ -32,6 +32,7 @@ distZip.finalizedBy copyExecutor
 distributions {
     main {
         baseName = 'redis-scheduler'
+        applicationName = 'redis'
         version = ''
     }
 }

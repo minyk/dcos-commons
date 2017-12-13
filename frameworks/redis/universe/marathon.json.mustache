@@ -21,24 +21,29 @@
   },
   {{/service.service_account_secret}}
   "env": {
+    "PACKAGE_NAME": "{{package-name}}",
+    "PACKAGE_VERSION": "{{package-version}}",
+    "PACKAGE_BUILD_TIME_EPOCH_MS": "{{package-build-time-epoch-ms}}",
+    "PACKAGE_BUILD_TIME_STR": "{{package-build-time-str}}",
     "FRAMEWORK_NAME": "{{service.name}}",
     "SLEEP_DURATION": "{{service.sleep}}",
     "FRAMEWORK_USER": "{{service.user}}",
     "FRAMEWORK_PRINCIPAL": "{{service.service_account}}",
     "FRAMEWORK_LOG_LEVEL": "{{service.log_level}}",
-    "BOOTSTRAP_URI": "{{resource.assets.uris.bootstrap-local}}",
+    "BOOTSTRAP_URI": "{{resource.assets.uris.bootstrap-zip}}",
+    "MESOS_API_VERSION": "V1",
 
     {{#service.virtual_network_enabled}}
     "ENABLE_VIRTUAL_NETWORK": "yes",
     "VIRTUAL_NETWORK_NAME": "{{service.virtual_network_name}}",
-    "VIRTUAL_NETWORK_PLUGIN_LABELS": "{{service.virtual_network_plugin_labels}}",
     {{/service.virtual_network_enabled}}
     "NODE_CPUS": "{{node.cpus}}",
     "NODE_MEM": "{{node.mem}}",
 
     "CONFIG_TEMPLATE_PATH": "redis-scheduler",
     "JAVA_URI": "{{resource.assets.uris.jre-tar-gz}}",
-    "EXECUTOR_URI": "{{resource.assets.uris.executor-local}}",
+    "EXECUTOR_URI": "{{resource.assets.uris.executor-zip}}",
+    "STADIS_URI": "{{resource.assets.uris.stadis-bin}}",
     "REDIS_IMAGE": "{{resource.assets.container.docker.hub-redis-3-alpine}}",
     "CORVUS_IMAGE": "{{resource.assets.container.docker.hub-corvus-alpine}}",
     {{#service.service_account_secret}}
@@ -78,9 +83,7 @@
   "uris": [
     "{{resource.assets.uris.jre-tar-gz}}",
     "{{resource.assets.uris.scheduler-zip}}",
-    "{{resource.assets.uris.libmesos-bundle-tar-gz}}",
-    "{{resource.assets.uris.bootstrap-zip}}",
-    "{{resource.assets.uris.executor-zip}}"
+    "{{resource.assets.uris.libmesos-bundle-tar-gz}}"
   ],
   "upgradeStrategy":{
     "minimumHealthCapacity": 0,
