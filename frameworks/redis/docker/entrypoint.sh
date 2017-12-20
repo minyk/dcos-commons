@@ -6,7 +6,7 @@ cd ${MESOS_SANDBOX}
 cp /usr/local/dcos/* .
 unzip redis-scheduler.zip -d .
 unzip bootstrap.zip -d .
-tar zxf jre-8u131-linux-x64-jce-unlimited.tar.gz
+tar zxf jre-8u144-linux-x64.tar.gz
 tar zxf libmesos-bundle-1.10-1.4-63e0814.tar.gz
 
 export LD_LIBRARY_PATH=$MESOS_SANDBOX/libmesos-bundle/lib:$LD_LIBRARY_PATH;
