@@ -3,7 +3,7 @@ target/
 .cache/
 
 # dcos-docker artifacts
-dcos-docker/
+tools/vagrant/dcos-docker
 ignore/
 genconf/
 .vagrant/
@@ -52,6 +52,8 @@ sdk/executor/build
 frameworks/*/build
 frameworks/*/dcos-commons-tools/
 frameworks/*/*-universe-url*
+frameworks/redis/docker/*.zip
+frameworks/redis/docker/*.tar.gz
 
 # vim swap files
 *.swp

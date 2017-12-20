@@ -40,7 +40,7 @@ elif [ -n "$BOX_PATH" ]; then
 fi
 
 echo "### Destroying pre-existing VM, if any"
-vagrant destroy # intentionally allowing confirmation prompt in case the user didn't actually want to do this
+vagrant destroy || true # intentionally allowing confirmation prompt in case the user didn't actually want to do this
 
 echo "### Bringing up VM"
 vagrant up
