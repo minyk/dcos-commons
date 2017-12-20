@@ -112,44 +112,6 @@ pods:
           REDIS_SENTINEL_CONF_DOWN_AFTER: {{REDIS_SENTINEL_CONF_DOWN_AFTER}}
           REDIS_SENTINEL_CONF_FAILOVER_TIMEOUT: {{REDIS_SENTINEL_CONF_FAILOVER_TIMEOUT}}
           REDIS_SENTINEL_CONF_PARALLEL_SYNCS: {{REDIS_SENTINEL_CONF_PARALLEL_SYNCS}}
-  corvus:
-    uris:
-      - {{BOOTSTRAP_URI}}
-    count: {{CORVUS_COUNT}}
-    placement: {{CORVUS_PLACEMENT}}
-    container:
-      image-name: {{CORVUS_IMAGE}}
-      {{#ENABLE_VIRTUAL_NETWORK}}
-      networks:
-        {{VIRTUAL_NETWORK_NAME}}:
-      {{/ENABLE_VIRTUAL_NETWORK}}
-      rlimits:
-        RLIMIT_NOFILE:
-          soft: 128000
-          hard: 128000
-    tasks:
-      redis:
-        goal: RUNNING
-        cmd: "cd ${MESOS_SANDBOX} && ./bootstrap -print-env=true -resolve=true -resolve-hosts=master-0-redis.${FRAMEWORK_HOST},${TASK_NAME}.${FRAMEWORK_HOST} && /usr/local/bin/corvus ./corvus.conf"
-        cpus: {{CORVUS_CPUS}}
-        memory: {{CORVUS_MEMORY}}
-        ports:
-          proxy:
-            port: 6379
-            advertise: true
-            vip:
-              port: 6379
-        configs:
-          corvus-conf:
-            template: "{{CONFIG_TEMPLATE_PATH}}/corvus.conf.mustache"
-            dest: "corvus.conf"
-        env:
-          CORVUS_CONF_LOGLEVEL: {{CORVUS_CONF_LOGLEVEL}}
-          CORVUS_CONF_CLIENT_TIMEOUT: {{CORVUS_CONF_CLIENT_TIMEOUT}}
-          CORVUS_CONF_SERVER_TIMEOUT: {{CORVUS_CONF_SERVER_TIMEOUT}}
-          CORVUS_CONF_BUFFERSIZE: {{CORVUS_CONF_BUFFERSIZE}}
-          CORVUS_CONF_READ_STRATEGY: {{CORVUS_CONF_READ_STRATEGY}}
-          CORVUS_CONF_STATSD_METRICS_ENABLED: {{CORVUS_CONF_STATSD_METRICS_ENABLED}}
 plans:
   deploy:
     strategy: serial
@@ -163,6 +125,3 @@ plans:
       slaves-phase:
         strategy: serial
         pod: slaves
-      proxy-phase:
-        strategy: serial
-        pod: corvus
