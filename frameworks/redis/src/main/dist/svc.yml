@@ -7,23 +7,22 @@ pods:
     uris:
       - {{BOOTSTRAP_URI}}
     count: 1
-    placement: {{NODE_PLACEMENT}}
-    container:
-      image-name: {{REDIS_IMAGE}}
-      {{#ENABLE_VIRTUAL_NETWORK}}
-      networks:
-        {{VIRTUAL_NETWORK_NAME}}:
-      {{/ENABLE_VIRTUAL_NETWORK}}
-      rlimits:
-        RLIMIT_NOFILE:
-          soft: 128000
-          hard: 128000
+    placement: {{REDIS_MASTER_PLACEMENT}}
+    image: {{REDIS_IMAGE}}
+    {{#ENABLE_VIRTUAL_NETWORK}}
+    networks:
+      {{VIRTUAL_NETWORK_NAME}}:
+    {{/ENABLE_VIRTUAL_NETWORK}}
+    rlimits:
+      RLIMIT_NOFILE:
+        soft: 128000
+        hard: 128000
     tasks:
       redis:
         goal: RUNNING
         cmd: "cd ${MESOS_SANDBOX} && ./bootstrap -print-env=true && /usr/local/bin/redis-server ./redis.conf"
-        cpus: {{NODE_CPUS}}
-        memory: {{NODE_MEM}}
+        cpus: {{REDIS_MASTER_CPUS}}
+        memory: {{REDIS_MASTER_MEM}}
         ports:
           client:
             port: 6379
@@ -34,7 +33,7 @@ pods:
             template: "{{CONFIG_TEMPLATE_PATH}}/redis.conf.mustache"
             dest: "redis.conf"
         env:
-          SLAVES: {{NODE_COUNT}}
+          SLAVES: {{REDIS_SLAVE_COUNT}}
           REDIS_CLIENT_PORT: 6379
           REDIS_CONF_TCP_BACKLOG: {{REDIS_CONF_TCP_BACKLOG}}
           REDIS_CONF_TIMEOUT: {{REDIS_CONF_TIMEOUT}}
@@ -44,24 +43,23 @@ pods:
   slaves:
     uris:
       - {{BOOTSTRAP_URI}}
-    count: {{NODE_COUNT}}
-    placement: {{NODE_PLACEMENT}}
-    container:
-      image-name: {{REDIS_IMAGE}}
-      {{#ENABLE_VIRTUAL_NETWORK}}
-      networks:
-        {{VIRTUAL_NETWORK_NAME}}:
-      {{/ENABLE_VIRTUAL_NETWORK}}
-      rlimits:
-        RLIMIT_NOFILE:
-          soft: 128000
-          hard: 128000
+    count: {{REDIS_SLAVE_COUNT}}
+    placement: {{REDIS_SLAVE_PLACEMENT}}
+    image: {{REDIS_IMAGE}}
+    {{#ENABLE_VIRTUAL_NETWORK}}
+    networks:
+      {{VIRTUAL_NETWORK_NAME}}:
+    {{/ENABLE_VIRTUAL_NETWORK}}
+    rlimits:
+      RLIMIT_NOFILE:
+        soft: 128000
+        hard: 128000
     tasks:
       redis:
         goal: RUNNING
         cmd: "cd ${MESOS_SANDBOX} && ./bootstrap -print-env=true -resolve=true -resolve-hosts=master-0-redis.${FRAMEWORK_HOST},${TASK_NAME}.${FRAMEWORK_HOST} && /usr/local/bin/redis-server ./redis.conf --slaveof master-0-redis.${FRAMEWORK_HOST} ${REDIS_CLIENT_PORT}"
-        cpus: {{NODE_CPUS}}
-        memory: {{NODE_MEM}}
+        cpus: {{REDIS_SLAVE_CPUS}}
+        memory: {{REDIS_MASTER_MEM}}
         ports:
           client:
             port: 6379
@@ -70,28 +68,28 @@ pods:
             template: "{{CONFIG_TEMPLATE_PATH}}/redis.conf.mustache"
             dest: "redis.conf"
         env:
-          SLAVES: {{NODE_COUNT}}
+          SLAVES: {{REDIS_SLAVE_COUNT}}
           REDIS_CLIENT_PORT: 6379
           REDIS_CONF_TCP_BACKLOG: {{REDIS_CONF_TCP_BACKLOG}}
           REDIS_CONF_TIMEOUT: {{REDIS_CONF_TIMEOUT}}
           REDIS_CONF_TCP_KEEPALIVE: {{REDIS_CONF_TCP_KEEPALIVE}}
           REDIS_CONF_LOGLEVEL: {{REDIS_CONF_LOGLEVEL}}
           REDIS_CONF_DATABASES: {{REDIS_CONF_DATABASES}}
+{{#REDIS_SENTINEL_ENABLED}}
   sentinels:
     uris:
       - {{BOOTSTRAP_URI}}
     count: {{REDIS_SENTINEL_COUNT}}
     placement: {{REDIS_SENTINEL_PLACEMENT}}
-    container:
-      image-name: {{REDIS_IMAGE}}
-      {{#ENABLE_VIRTUAL_NETWORK}}
-      networks:
-        {{VIRTUAL_NETWORK_NAME}}:
-      {{/ENABLE_VIRTUAL_NETWORK}}
-      rlimits:
-        RLIMIT_NOFILE:
-          soft: 128000
-          hard: 128000
+    image: {{REDIS_IMAGE}}
+    {{#ENABLE_VIRTUAL_NETWORK}}
+    networks:
+      {{VIRTUAL_NETWORK_NAME}}:
+    {{/ENABLE_VIRTUAL_NETWORK}}
+    rlimits:
+      RLIMIT_NOFILE:
+        soft: 128000
+        hard: 128000
     tasks:
       redis:
         goal: RUNNING
@@ -108,10 +106,12 @@ pods:
         env:
           REDIS_SENTINEL_PORT: 26379
           REDIS_CLIENT_PORT: 6379
+          REDIS_SENTINEL_CONF_MASTER_NAME: {{REDIS_SENTINEL_CONF_MASTER_NAME}}
           REDIS_SENTINEL_CONF_QUORUM: {{REDIS_SENTINEL_CONF_QUORUM}}
           REDIS_SENTINEL_CONF_DOWN_AFTER: {{REDIS_SENTINEL_CONF_DOWN_AFTER}}
           REDIS_SENTINEL_CONF_FAILOVER_TIMEOUT: {{REDIS_SENTINEL_CONF_FAILOVER_TIMEOUT}}
           REDIS_SENTINEL_CONF_PARALLEL_SYNCS: {{REDIS_SENTINEL_CONF_PARALLEL_SYNCS}}
+{{/REDIS_SENTINEL_ENABLED}}
 plans:
   deploy:
     strategy: serial
@@ -119,9 +119,11 @@ plans:
       master-phase:
         strategy: serial
         pod: master
+{{#REDIS_SENTINEL_ENABLED}}
       sentinels-phase:
         strategy: parallel
         pod: sentinels
+{{/REDIS_SENTINEL_ENABLED}}
       slaves-phase:
         strategy: serial
         pod: slaves

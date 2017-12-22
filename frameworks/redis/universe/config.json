@@ -56,41 +56,6 @@
           "user"
         ]
       },
-      "node": {
-        "description": "Redis Slaves Configuration properties",
-        "type": "object",
-        "properties": {
-          "count": {
-            "title": "Slave Node count",
-            "description": "Number of Template pods to run",
-            "type": "integer",
-            "default":2
-          },
-          "placement_constraint": {
-            "title": "Placement constraint",
-            "description": "Marathon-style placement constraint for nodes. Example: 'hostname:UNIQUE'",
-            "type": "string",
-            "default": ""
-          },
-          "cpus": {
-            "title": "CPU count",
-            "description": "Template pod CPU requirements",
-            "type": "number",
-            "default":0.1
-          },
-          "mem": {
-            "title": "Memory size (MB)",
-            "description": "Template pod mem requirements (in MB)",
-            "type": "integer",
-            "default":64
-          }
-        },
-        "required":[
-          "count",
-          "cpus",
-          "mem"
-        ]
-      },
       "redis": {
         "description": "Redis configurations",
         "type": "object",
@@ -128,10 +93,71 @@
           }
         }
       },
+      "redis-master": {
+        "description": "Redis Master Configuration properties",
+        "type": "object",
+        "properties": {
+          "placement_constraint": {
+            "title": "Placement constraint",
+            "description": "Marathon-style placement constraint for nodes. Example: 'hostname:UNIQUE'",
+            "type": "string",
+            "default": ""
+          },
+          "cpus": {
+            "title": "CPU count",
+            "description": "Master CPU requirements",
+            "type": "number",
+            "default":0.1
+          },
+          "mem": {
+            "title": "Memory size (MB)",
+            "description": "Master mem requirements (in MB). Also redis slaves uses this configuration.",
+            "type": "integer",
+            "default":64
+          }
+        },
+        "required":[
+          "cpus",
+          "mem"
+        ]
+      },
+      "redis-slave": {
+        "description": "Redis Slaves Configuration properties",
+        "type": "object",
+        "properties": {
+          "count": {
+            "title": "Slave Node count",
+            "description": "Number of Template pods to run",
+            "type": "integer",
+            "default":2
+          },
+          "placement_constraint": {
+            "title": "Placement constraint",
+            "description": "Marathon-style placement constraint for nodes. Example: 'hostname:UNIQUE'",
+            "type": "string",
+            "default": ""
+          },
+          "cpus": {
+            "title": "CPU count",
+            "description": "Slave CPU requirements",
+            "type": "number",
+            "default":0.1
+          }
+        },
+        "required":[
+          "count",
+          "cpus"
+        ]
+      },
       "redis-sentinel": {
         "description": "Redis sentinel configurations. Experts only.",
         "type": "object",
         "properties": {
+          "sentinel_enabled": {
+            "description": "Enable redis sentinel",
+            "type": "boolean",
+            "default": true
+          },
           "count": {
             "title": "Sentinel Node count",
             "description": "Number of sentinel pods to run. 3 or 5 is enough.",
@@ -143,6 +169,12 @@
             "description": "Marathon-style placement constraint for sentinel nodes. Example: 'hostname:UNIQUE'",
             "type": "string",
             "default": "hostname:UNIQUE"
+          },
+          "master-name": {
+            "title": "Name of master",
+            "description": "Redis master name for watching.",
+            "type": "string",
+            "default": "mymaster"
           },
           "quorum": {
             "title": "Slave Quorum",
@@ -173,80 +205,12 @@
           "count",
           "quorum"
         ]
-      },
-      "corvus": {
-        "description": "A fast and lightweight Redis Cluster Proxy.",
-        "type": "object",
-        "properties": {
-          "count": {
-            "title": "Proxy Node count",
-            "description": "Number of corvus pods to run.",
-            "type": "integer",
-            "default":1
-          },
-          "placement_constraint": {
-            "title": "Placement constraint",
-            "description": "Marathon-style placement constraint for sentinel nodes. Example: 'hostname:UNIQUE'",
-            "type": "string",
-            "default": "hostname:UNIQUE"
-          },
-          "cpus": {
-            "title": "CPU count",
-            "description": "Template pod CPU requirements",
-            "type": "number",
-            "default":0.1
-          },
-          "mem": {
-            "title": "Memory size (MB)",
-            "description": "Template pod mem requirements (in MB)",
-            "type": "integer",
-            "default": 32
-          },
-          "loglevel": {
-            "description": "Log Level for Corvus",
-            "type": "string",
-            "enum": ["error", "warn", "info", "debug"],
-            "default": "info"
-          },
-          "client-timeout": {
-            "description": "Timeout in seconds for clients.",
-            "type": "integer",
-            "default": 30
-          },
-          "server-timeout": {
-            "description": "Timeout in seconds for redis servers",
-            "type": "integer",
-            "default": 5
-          },
-          "bufsize": {
-            "description": "Buffer size(KB) allocated each time avoiding fragments",
-            "type": "integer",
-            "default": 16384
-          },
-          "read-strategy": {
-            "description": "how to read from the cluster.",
-            "type": "string",
-            "enum": ["master", "read-slave-only", "both"],
-            "default": "read-slave-only"
-          },
-          "statd-metrics-enabled": {
-            "description": "Enable metrics.",
-            "type": "boolean",
-            "default": false
-          }
-        },
-        "required":[
-          "count",
-          "cpus",
-          "mem"
-        ]
       }
     },
     "required": [
       "service",
-      "node",
       "redis",
-      "redis-sentinel",
-      "corvus"
+      "redis-slave",
+      "redis-sentinel"
     ]
 }

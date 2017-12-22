@@ -35,9 +35,6 @@ public class ServiceTest {
 //        ticks.add(Expect.allPlansComplete());
 
         new ServiceTestRunner()
-                .setPodEnv("redis", "ETCD_IMAGE", "harbor.ajway.kr/middleware/redis:4.0.1-alpine")
-                .setPodEnv("redis", "VIRTUAL_NETWORK_NAME", "dcos")
-                .setPodEnv("redis", "CORVUS_IMAGE", "minyk/corvus:0.2.6-alpine")
                 .setPodEnv("redis", "VIRTUAL_NETWORK_NAME", "dcos")
                 .setPodEnv("redis", "ENABLE_VIRTUAL_NETWORK", "yes")
                 .run();

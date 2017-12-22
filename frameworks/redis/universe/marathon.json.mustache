@@ -37,15 +37,12 @@
     "ENABLE_VIRTUAL_NETWORK": "yes",
     "VIRTUAL_NETWORK_NAME": "{{service.virtual_network_name}}",
     {{/service.virtual_network_enabled}}
-    "NODE_CPUS": "{{node.cpus}}",
-    "NODE_MEM": "{{node.mem}}",
 
     "CONFIG_TEMPLATE_PATH": "redis-scheduler",
     "JAVA_URI": "{{resource.assets.uris.jre-tar-gz}}",
     "EXECUTOR_URI": "{{resource.assets.uris.executor-zip}}",
     "STADIS_URI": "{{resource.assets.uris.stadis-bin}}",
     "REDIS_IMAGE": "{{resource.assets.container.docker.hub-redis-3-alpine}}",
-    "CORVUS_IMAGE": "{{resource.assets.container.docker.hub-corvus-alpine}}",
     {{#service.service_account_secret}}
     "DCOS_SERVICE_ACCOUNT_CREDENTIAL": { "secret": "serviceCredential" },
     "MESOS_MODULES": "{\"libraries\": [{\"file\": \"libdcos_security.so\", \"modules\": [{\"name\": \"com_mesosphere_dcos_ClassicRPCAuthenticatee\"}]}]}",
@@ -53,31 +50,30 @@
     {{/service.service_account_secret}}
     "LIBMESOS_URI": "{{resource.assets.uris.libmesos-bundle-tar-gz}}",
 
-    "NODE_COUNT": "{{node.count}}",
-    "NODE_PLACEMENT": "{{node.placement_constraint}}",
+
     "REDIS_CONF_TCP_BACKLOG": "{{redis.tcp-backlog}}",
     "REDIS_CONF_TIMEOUT": "{{redis.timeout}}",
     "REDIS_CONF_TCP_KEEPALIVE": "{{redis.tcp-keepalive}}",
     "REDIS_CONF_LOGLEVEL": "{{redis.loglevel}}",
     "REDIS_CONF_DATABASES": "{{redis.databases}}",
 
+    "REDIS_MASTER_CPUS": "{{redis-master.cpus}}",
+    "REDIS_MASTER_MEM": "{{redis-master.mem}}",
+    "REDIS_MASTER_PLACEMENT": "{{redis-master.placement_constraint}}",
+
+    "REDIS_SLAVE_CPUS": "{{redis-slave.cpus}}",
+    "REDIS_SLAVE_COUNT": "{{redis-slave.count}}",
+    "REDIS_SLAVE_PLACEMENT": "{{redis-slave.placement_constraint}}",
+
+
+    "REDIS_SENTINEL_ENABLED": "{{redis-sentinel.sentinel_enabled}}",
     "REDIS_SENTINEL_COUNT": "{{redis-sentinel.count}}",
     "REDIS_SENTINEL_PLACEMENT": "{{redis-sentinel.placement_constraint}}",
+    "REDIS_SENTINEL_CONF_MASTER_NAME": "{{redis-sentinel.master-name}}",
     "REDIS_SENTINEL_CONF_QUORUM": "{{redis-sentinel.quorum}}",
     "REDIS_SENTINEL_CONF_DOWN_AFTER": "{{redis-sentinel.down-after}}",
     "REDIS_SENTINEL_CONF_FAILOVER_TIMEOUT": "{{redis-sentinel.failover-timeout}}",
-    "REDIS_SENTINEL_CONF_PARALLEL_SYNCS": "{{redis-sentinel.parallel-syncs}}",
-
-    "CORVUS_COUNT": "{{corvus.count}}",
-    "CORVUS_PLACEMENT": "{{corvus.placement_constraint}}",
-    "CORVUS_CPUS": "{{corvus.cpus}}",
-    "CORVUS_MEMORY": "{{corvus.mem}}",
-    "CORVUS_CONF_LOGLEVEL": "{{corvus.loglevel}}",
-    "CORVUS_CONF_CLIENT_TIMEOUT": "{{corvus.client-timeout}}",
-    "CORVUS_CONF_SERVER_TIMEOUT": "{{corvus.server-timeout}}",
-    "CORVUS_CONF_BUFFERSIZE": "{{corvus.bufsize}}",
-    "CORVUS_CONF_READ_STRATEGY": "{{corvus.read-strategy}}",
-    "CORVUS_CONF_STATSD_METRICS_ENABLED": "{{corvus.statd-metrics-enabled}}"
+    "REDIS_SENTINEL_CONF_PARALLEL_SYNCS": "{{redis-sentinel.parallel-syncs}}"
 
   },
   "uris": [
