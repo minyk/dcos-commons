@@ -41,7 +41,7 @@
     "CONFIG_TEMPLATE_PATH": "redis-scheduler",
     "JAVA_URI": "{{resource.assets.uris.jre-tar-gz}}",
     "EXECUTOR_URI": "{{resource.assets.uris.executor-zip}}",
-    "STADIS_URI": "{{resource.assets.uris.stadis-bin}}",
+    "STADIS_URI": "{{resource.assets.uris.stadis-zip}}",
     "REDIS_IMAGE": "{{resource.assets.container.docker.hub-redis-3-alpine}}",
     {{#service.service_account_secret}}
     "DCOS_SERVICE_ACCOUNT_CREDENTIAL": { "secret": "serviceCredential" },
@@ -50,7 +50,8 @@
     {{/service.service_account_secret}}
     "LIBMESOS_URI": "{{resource.assets.uris.libmesos-bundle-tar-gz}}",
 
-
+    "ENABLE_STADIS": "{{redis.stadis_enabled}}",
+    "STADIS_INTERVAL": "{{redis.stadis_interval}}",
     "REDIS_CONF_TCP_BACKLOG": "{{redis.tcp-backlog}}",
     "REDIS_CONF_TIMEOUT": "{{redis.timeout}}",
     "REDIS_CONF_TCP_KEEPALIVE": "{{redis.tcp-keepalive}}",

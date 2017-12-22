@@ -6,7 +6,7 @@
       "scheduler-zip": "{{artifact-dir}}/redis-scheduler.zip",
       "bootstrap-zip": "{{artifact-dir}}/bootstrap.zip",
       "executor-zip": "{{artifact-dir}}/executor.zip",
-      "stadis-bin": "{{artifact-dir}}/stadis-linux-amd64.zip",
+      "stadis-zip": "{{artifact-dir}}/stadis-linux-amd64.zip",
       "bootstrap-local": "http://api.redis.marathon.l4lb.thisdcos.directory/v1/files/bootstrap.zip",
       "executor-local": "http://api.redis.marathon.l4lb.thisdcos.directory/v1/files/executor.zip"
     },

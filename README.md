@@ -5,6 +5,12 @@ Redis Scheduler for DC/OS
 
 ![Image of schduler](frameworks/redis/docs/redis-scheduler.png)
 
+## Features
+
+* Running 1 master node
+* Running N slave nodes
+* Running N sentinel nodes(Optional)
+* Export redis stats to dcos-metrics(Optional)
 * redis master client endpoint: `client.<redis-frameworkname>.l4lb.thisdcos.directory:6379`
  * If service is running under the sub group, endpoint is: `client.<subgroup><servicename>.l4lb.thisdcos.directory:6379`
 

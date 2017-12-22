@@ -6,6 +6,7 @@ pods:
   master:
     uris:
       - {{BOOTSTRAP_URI}}
+      - {{STADIS_URI}}
     count: 1
     placement: {{REDIS_MASTER_PLACEMENT}}
     image: {{REDIS_IMAGE}}
@@ -40,9 +41,20 @@ pods:
           REDIS_CONF_TCP_KEEPALIVE: {{REDIS_CONF_TCP_KEEPALIVE}}
           REDIS_CONF_LOGLEVEL: {{REDIS_CONF_LOGLEVEL}}
           REDIS_CONF_DATABASES: {{REDIS_CONF_DATABASES}}
+      {{#ENABLE_STADIS}}
+      stadis:
+        goal: RUNNING
+        cmd: "cd ${MESOS_SANDBOX} && ./bootstrap -print-env=true -resolve=true -resolve-hosts=master-0-redis.${FRAMEWORK_HOST},${TASK_NAME}.${FRAMEWORK_HOST} && ./stadis-linux-amd64 --redis-host master-${POD_INSTANCE_INDEX}-redis.${FRAMEWORK_HOST}:${REDIS_CLIENT_PORT} --statsd-host ${STATSD_UDP_HOST}:${STATSD_UDP_PORT} --prefix ${FRAMEWORK_NAME} --interval ${STADIS_INTERVAL}"
+        cpus: 0.1
+        memory: 32
+        env:
+          REDIS_CLIENT_PORT: 6379
+          STADIS_INTERVAL: {{STADIS_INTERVAL}}
+      {{/ENABLE_STADIS}}
   slaves:
     uris:
       - {{BOOTSTRAP_URI}}
+      - {{STADIS_URI}}
     count: {{REDIS_SLAVE_COUNT}}
     placement: {{REDIS_SLAVE_PLACEMENT}}
     image: {{REDIS_IMAGE}}
@@ -75,6 +87,16 @@ pods:
           REDIS_CONF_TCP_KEEPALIVE: {{REDIS_CONF_TCP_KEEPALIVE}}
           REDIS_CONF_LOGLEVEL: {{REDIS_CONF_LOGLEVEL}}
           REDIS_CONF_DATABASES: {{REDIS_CONF_DATABASES}}
+      {{#ENABLE_STADIS}}
+      stadis:
+        goal: RUNNING
+        cmd: "cd ${MESOS_SANDBOX} && ./bootstrap -print-env=true -resolve=true -resolve-hosts=slaves-${POD_INSTANCE_INDEX}-redis.${FRAMEWORK_HOST},${TASK_NAME}.${FRAMEWORK_HOST} && ./stadis-linux-amd64 --redis-host slaves-${POD_INSTANCE_INDEX}-redis.${FRAMEWORK_HOST}:${REDIS_CLIENT_PORT} --statsd-host ${STATSD_UDP_HOST}:${STATSD_UDP_PORT} --prefix ${FRAMEWORK_NAME} --interval ${STADIS_INTERVAL}"
+        cpus: 0.1
+        memory: 32
+        env:
+          REDIS_CLIENT_PORT: 6379
+          STADIS_INTERVAL: {{STADIS_INTERVAL}}
+      {{/ENABLE_STADIS}}
 {{#REDIS_SENTINEL_ENABLED}}
   sentinels:
     uris:

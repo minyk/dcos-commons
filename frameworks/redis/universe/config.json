@@ -60,6 +60,17 @@
         "description": "Redis configurations",
         "type": "object",
         "properties": {
+          "stadis_enabled": {
+            "description": "Enable redis status export to DC/OS Metrics.",
+            "type": "boolean",
+            "default": true
+          },
+          "stadis_interval": {
+            "title": "stadis interval",
+            "description": "Interval(ms) for metrics.",
+            "type": "integer",
+            "default": 5000
+          },
           "tcp-backlog": {
             "title": "tcp-backlog",
             "description": "tcp-backlog",
@@ -80,7 +91,7 @@
           },
           "loglevel": {
             "title": "loglevel",
-            "description": "loglevel",
+            "description": "loglevel. One of 'debug', 'verbose', 'notice', 'warning'",
             "type": "string",
             "enum": ["debug", "verbose", "notice", "warning"],
             "default": "notice"
