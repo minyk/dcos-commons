@@ -23,6 +23,8 @@ ext {
 dependencies {
     compile project(":scheduler")
     compile project(":executor")
+    compile 'io.lettuce:lettuce-core:5.0.1.RELEASE'
+    compile 'com.google.code.gson:gson:2.8.0'
     testCompile project(":testing")
 }
 

@@ -121,6 +121,8 @@ pods:
         ports:
           sentinel:
             port: 26379
+            vip:
+              port: 26379
         configs:
           sentinel-conf:
             template: "{{CONFIG_TEMPLATE_PATH}}/redis-sentinel.conf.mustache"

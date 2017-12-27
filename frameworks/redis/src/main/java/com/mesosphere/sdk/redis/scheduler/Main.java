@@ -1,6 +1,7 @@
 package com.mesosphere.sdk.redis.scheduler;
 
 import com.mesosphere.sdk.redis.api.RedisMonitorResource;
+import com.mesosphere.sdk.redis.api.RedisSentinelResource;
 import com.mesosphere.sdk.scheduler.*;
 import com.mesosphere.sdk.specification.DefaultServiceSpec;
 import com.mesosphere.sdk.specification.yaml.RawServiceSpec;
@@ -51,6 +52,7 @@ public class Main {
         apiResources.add(new Instance());
         apiResources.add(new FileResource());
         apiResources.add(new RedisMonitorResource(serviceName));
+        apiResources.add(new RedisSentinelResource(serviceName));
         return apiResources;
     }
 }

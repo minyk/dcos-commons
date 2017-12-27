@@ -221,6 +221,7 @@
     "required": [
       "service",
       "redis",
+      "redis-master",
       "redis-slave",
       "redis-sentinel"
     ]
