@@ -6,7 +6,7 @@ Redis Scheduler for DC/OS
 ![Image of schduler](frameworks/redis/docs/redis-scheduler.png)
 
 ## Features
-
+* The major 25 properties are configurable from scheduler.
 * Running 1 master node
 * Running N slave nodes
 * Running N sentinel nodes(Optional)

@@ -56,20 +56,15 @@
           "user"
         ]
       },
-      "redis": {
-        "description": "Redis configurations",
+      "redis-network": {
+        "description": "Redis Network configurations",
         "type": "object",
         "properties": {
-          "stadis_enabled": {
-            "description": "Enable redis status export to DC/OS Metrics.",
+          "protected-mode": {
+            "title": "protected mode",
+            "description": "Enabled protected mode. Enable if redis is exposed to external network.",
             "type": "boolean",
-            "default": true
-          },
-          "stadis_interval": {
-            "title": "stadis interval",
-            "description": "Interval(ms) for metrics.",
-            "type": "integer",
-            "default": 5000
+            "default": false
           },
           "tcp-backlog": {
             "title": "tcp-backlog",
@@ -88,7 +83,19 @@
             "description": "tcp-keepalive in seconds.",
             "type": "integer",
             "default": 300
-          },
+          }
+        },
+        "required":[
+          "protected-mode",
+          "tcp-backlog",
+          "timeout",
+          "tcp-keepalive"
+        ]
+      },
+      "redis-general": {
+        "description": "Redis General configurations",
+        "type": "object",
+        "properties": {
           "loglevel": {
             "title": "loglevel",
             "description": "loglevel. One of 'debug', 'verbose', 'notice', 'warning'",
@@ -102,62 +109,224 @@
             "type": "integer",
             "default": 16
           }
-        }
+        },
+        "required":[
+          "loglevel",
+          "databases"
+        ]
       },
-      "redis-master": {
+      "redis-snapshotting": {
+        "description": "Redis Snapshotting configurations",
+        "type": "object",
+        "properties": {
+          "save-enabled": {
+            "title": "RDB save enable",
+            "description": "Enable RDB save feature.",
+            "type": "boolean",
+            "default": false
+          },
+          "save-seconds": {
+            "title": "save seconds configuration",
+            "description": "RDB save after this seconds.",
+            "type": "integer",
+            "default": 300
+          },
+          "save-keys": {
+            "title": "save keys configuration",
+            "description": "RDB save after this keys changed.",
+            "type": "integer",
+            "default": 10
+          }
+        },
+        "required":[
+          "save-enabled",
+          "save-seconds",
+          "save-keys"
+        ]
+      },
+      "redis-security": {
+        "description": "Redis Security configurations",
+        "type": "object",
+        "properties": {
+          "requirepass": {
+            "title": "requirepass",
+            "description": "password for redis connections.",
+            "type": "string",
+            "default": "pass"
+          }
+        },
+        "required":[
+          "requirepass"
+        ]
+      },
+      "redis-limits": {
+        "description": "Redis Limits configurations",
+        "type": "object",
+        "properties": {
+          "maxclients": {
+            "title": "maxclients",
+            "description": "maximum client numbers.",
+            "type": "integer",
+            "default": 1000
+          },
+          "maxmemory": {
+            "title": "maxmemory",
+            "description": "Maximum memory usage. Can be setted like this: 1m, 1mb, 1g or 1gb.",
+            "type": "string",
+            "default": "32mb"
+          },
+          "maxmemory-policy": {
+            "title": "maxmemory policy",
+            "description": "Maximum memory eviction policy. One of volatile-lru, allkeys-lru, volatile-random, allkeys-random, volatile-ttl or noeviction.",
+            "type": "string",
+            "default": "volatile-lru"
+          },
+          "maxmemory-samples": {
+            "title": "maxmemory samples",
+            "description": "Sampling number for maxmemory policy. One from 1 to 10. 10 Approximates very closely true LRU but costs a bit more CPU. 3 is very fast but not very accurate.",
+            "type": "integer",
+            "default": 5
+          }
+        },
+        "required":[
+          "maxclients",
+          "maxmemory",
+          "maxmemory-policy",
+          "maxmemory-samples"
+        ]
+      },
+      "redis-appendonlymode": {
+        "description": "Redis Append only mode configurations",
+        "type": "object",
+        "properties": {
+          "appendonly": {
+            "title": "appendonly",
+            "description": "Enable append only mode.",
+            "type": "boolean",
+            "default": true
+          },
+          "auto-aof-rewrite-percentage": {
+            "title": "auto-aof-rewrite-percentage",
+            "description": "Percentage(1 to 100) between latest rewrite file and current rewrite file size. Specify a percentage of zero in order to disable the automatic AOF rewrite feature.",
+            "type": "integer",
+            "default": 0
+          },
+          "auto-aof-rewrite-min-size": {
+            "title": "auto-aof-rewrite-min-size",
+            "description": "Specify a minimal size for the AOF file to be rewritten.",
+            "type": "string",
+            "default": "64mb"
+          }
+        },
+        "required":[
+          "appendonly",
+          "auto-aof-rewrite-percentage",
+          "auto-aof-rewrite-min-size"
+        ]
+      },
+      "redis-advanced": {
+        "description": "Redis Advanced configurations",
+        "type": "object",
+        "properties": {
+          "hash-max-ziplist-entries": {
+            "title": "hash-max-ziplist-entries",
+            "description": "hash-max-ziplist-entries",
+            "type": "integer",
+            "default": 512
+          },
+          "hash-max-ziplist-value": {
+            "title": "hash-max-ziplist-value",
+            "description": "hash-max-ziplist-value",
+            "type": "integer",
+            "default": 64
+          },
+          "list-max-ziplist-size": {
+            "title": "list-max-ziplist-size",
+            "description": "a fixed maximum size or a maximum number of elements. For a fixed maximum size, use -5 through -1.",
+            "type": "integer",
+            "default": -2
+          },
+          "list-compress-depth": {
+            "title": "list-compress-depth",
+            "description": "Compress depth of list. 0: disable all list compression.",
+            "type": "integer",
+            "default": 2
+          },
+          "set-max-intset-entries": {
+            "title": "set-max-intset-entries",
+            "description": "Setting sets the limit in the size of the set in order to use this special memory saving encoding.",
+            "type": "integer",
+            "default": 512
+          },
+          "zset-max-ziplist-entries": {
+            "title": "zset-max-ziplist-entries",
+            "description": "Setting sets the limit in the size of the set in order to use this special memory saving encoding.",
+            "type": "integer",
+            "default": 128
+          },
+          "zset-max-ziplist-value": {
+            "title": "set-max-intset-entries",
+            "description": "Setting sets the limit in the size of the set in order to use this special memory saving encoding.",
+            "type": "integer",
+            "default": 64
+          },
+          "hll-sparse-max-bytes": {
+            "title": "hll-sparse-max-bytes",
+            "description": "HyperLogLog sparse representation bytes limit.",
+            "type": "integer",
+            "default": 3000
+          }
+        },
+        "required":[
+          "hash-max-ziplist-entries",
+          "hash-max-ziplist-value",
+          "list-max-ziplist-size",
+          "list-compress-depth",
+          "set-max-intset-entries",
+          "zset-max-ziplist-entries",
+          "zset-max-ziplist-value",
+          "hll-sparse-max-bytes"
+        ]
+      },
+      "redis-node": {
         "description": "Redis Master Configuration properties",
         "type": "object",
         "properties": {
-          "placement_constraint": {
-            "title": "Placement constraint",
-            "description": "Marathon-style placement constraint for nodes. Example: 'hostname:UNIQUE'",
-            "type": "string",
-            "default": ""
-          },
           "cpus": {
             "title": "CPU count",
             "description": "Master CPU requirements",
             "type": "number",
-            "default":0.1
+            "default":1
           },
           "mem": {
             "title": "Memory size (MB)",
             "description": "Master mem requirements (in MB). Also redis slaves uses this configuration.",
             "type": "integer",
             "default":64
+          },
+          "count_slaves": {
+            "title": "Slave Node count",
+            "description": "Number of slave nodes to run",
+            "type": "integer",
+            "default":2
+          },
+          "placement_constraint_master": {
+            "title": "Master placement constraint",
+            "description": "Marathon-style placement constraint for slave nodes. Example: 'hostname:UNIQUE'",
+            "type": "string",
+            "default": ""
+          },
+          "placement_constraint_slaves": {
+            "title": "Slave placement constraint",
+            "description": "Marathon-style placement constraint for slave nodes. Example: 'hostname:UNIQUE'",
+            "type": "string",
+            "default": ""
           }
         },
         "required":[
           "cpus",
-          "mem"
-        ]
-      },
-      "redis-slave": {
-        "description": "Redis Slaves Configuration properties",
-        "type": "object",
-        "properties": {
-          "count": {
-            "title": "Slave Node count",
-            "description": "Number of Template pods to run",
-            "type": "integer",
-            "default":2
-          },
-          "placement_constraint": {
-            "title": "Placement constraint",
-            "description": "Marathon-style placement constraint for nodes. Example: 'hostname:UNIQUE'",
-            "type": "string",
-            "default": ""
-          },
-          "cpus": {
-            "title": "CPU count",
-            "description": "Slave CPU requirements",
-            "type": "number",
-            "default":0.1
-          }
-        },
-        "required":[
-          "count",
-          "cpus"
+          "mem",
+          "count_slaves"
         ]
       },
       "redis-sentinel": {
@@ -213,16 +382,46 @@
           }
         },
         "required":[
+          "sentinel_enabled",
           "count",
+          "placement_constraint",
+          "master-name",
           "quorum"
+        ]
+      },
+      "redis-stadis": {
+        "description": "Redis Stadis Configuration properties",
+        "type": "object",
+        "properties": {
+          "stadis_enabled": {
+            "description": "Enable redis status export to DC/OS Metrics.",
+            "type": "boolean",
+            "default": true
+          },
+          "stadis_interval": {
+            "title": "stadis interval",
+            "description": "Interval(ms) for metrics.",
+            "type": "integer",
+            "default": 5000
+          }
+        },
+        "required":[
+          "stadis_enabled",
+          "stadis_interval"
         ]
       }
     },
     "required": [
       "service",
-      "redis",
-      "redis-master",
-      "redis-slave",
-      "redis-sentinel"
+      "redis-network",
+      "redis-general",
+      "redis-snapshotting",
+      "redis-security",
+      "redis-limits",
+      "redis-appendonlymode",
+      "redis-advanced",
+      "redis-node",
+      "redis-sentinel",
+      "redis-stadis"
     ]
 }

@@ -12,6 +12,7 @@
     },
     "container": {
       "docker": {
+        "hub-redis-3": "redis:3.2.11",
         "hub-redis-4-alpine": "library/redis:4.0.1-alpine",
         "hub-redis-3-alpine": "library/redis:3.2.11-alpine"
       }
