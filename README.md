@@ -139,6 +139,34 @@ id=3 addr=9.0.0.10:45698 fd=17 name=sentinel-d8bfde6b-cmd age=457 idle=0 flags=N
 id=4 addr=9.0.0.193:58814 fd=22 name= age=0 idle=0 flags=N db=0 sub=0 psub=0 multi=-1 qbuf=0 qbuf-free=32768 obl=0 oll=0 omem=0 events=r cmd=client
 ```
 
+### Benchmark
+* Start benchmark plan like:
+```
+$ dcos redis plan start benchmark \
+    -p REDIS_CLIENT_PORT=6379 \
+    -p REDIS_BENCHMARK_CLIENTS=50 \
+    -p REDIS_BENCHMARK_REQUESTS=100000 \
+    -p REDIS_BENCHMARK_DATASIZE=2 
+```
+
+* Then see `STDOUT` log of `benchmark-0-node`:
+```
+98.60% <= 25 milliseconds
+98.73% <= 26 milliseconds
+98.83% <= 27 milliseconds
+98.93% <= 28 milliseconds
+99.08% <= 29 milliseconds
+99.29% <= 30 milliseconds
+99.41% <= 31 milliseconds
+99.65% <= 32 milliseconds
+99.82% <= 33 milliseconds
+99.89% <= 34 milliseconds
+99.97% <= 35 milliseconds
+100.00% <= 35 milliseconds
+22650.06 requests per second
+
+```
+
 # How to use 
 ## Build
 ```bash

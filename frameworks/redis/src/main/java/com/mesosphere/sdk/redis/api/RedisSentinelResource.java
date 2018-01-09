@@ -32,7 +32,7 @@ public class RedisSentinelResource {
     private final Gson gson = new Gson();
 
     public RedisSentinelResource(String name) {
-        this.sentinelHost = "sentinel." + name + VIP_POST_FIX;
+        this.sentinelHost = "sentinel." + name.replace("/", "") + VIP_POST_FIX;
         logger.debug("Monitor redis at " + sentinelHost);
         RedisURI redisUri = RedisURI.create("redis://" + sentinelHost + ":26379");
         redisClient = RedisClient.create(redisUri);

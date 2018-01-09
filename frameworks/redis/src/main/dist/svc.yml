@@ -177,6 +177,28 @@ pods:
           REDIS_SENTINEL_CONF_FAILOVER_TIMEOUT: {{REDIS_SENTINEL_CONF_FAILOVER_TIMEOUT}}
           REDIS_SENTINEL_CONF_PARALLEL_SYNCS: {{REDIS_SENTINEL_CONF_PARALLEL_SYNCS}}
 {{/REDIS_SENTINEL_ENABLED}}
+  benchmark:
+    uris:
+      - {{BOOTSTRAP_URI}}
+    count: 1
+    image: {{REDIS_IMAGE}}
+    {{#ENABLE_VIRTUAL_NETWORK}}
+    networks:
+      {{VIRTUAL_NETWORK_NAME}}:
+    {{/ENABLE_VIRTUAL_NETWORK}}
+    tasks:
+      node:
+        goal: ONCE
+        cpus: {{REDIS_NODE_CPUS}}
+        memory: 1024
+        cmd: "cd ${MESOS_SANDBOX} && ./bootstrap -print-env=true -resolve=true -resolve-hosts=master-0-redis.${FRAMEWORK_HOST},${TASK_NAME}.${FRAMEWORK_HOST} && /usr/local/bin/redis-benchmark -h master-0-redis.${FRAMEWORK_HOST} -p ${REDIS_CLIENT_PORT} -a ${REDIS_CONF_REQUIREPASS} -c ${REDIS_BENCHMARK_CLIENTS} -n ${REDIS_BENCHMARK_REQUESTS} -d ${REDIS_BENCHMARK_DATASIZE}"
+        env:
+          REDIS_SENTINEL_PORT: 26379
+          REDIS_CLIENT_PORT: 6379
+          REDIS_CONF_REQUIREPASS: {{REDIS_CONF_REQUIREPASS}}
+          REDIS_BENCHMARK_CLIENTS: 50
+          REDIS_BENCHMARK_REQUESTS: 100000
+          REDIS_BENCHMARK_DATASIZE: 2
 plans:
   deploy:
     strategy: serial
@@ -192,3 +214,9 @@ plans:
       slaves-phase:
         strategy: serial
         pod: slaves
+  benchmark:
+    strategy: serial
+    phases:
+      node-phase:
+        strategy: parallel
+        pod: benchmark
